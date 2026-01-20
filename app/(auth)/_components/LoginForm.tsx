@@ -1,111 +1,102 @@
 "use client";
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { useState, useTransition } from "react";
-import { Eye, EyeOff } from "lucide-react";
-
-import { LoginData, loginSchema } from "../schema";
+import { loginSchema, LoginData } from "../schema";
+import { login } from "@/lib/api/auth";
+import { setAuthToken, setUserData } from "@/lib/cookies";
 
 export default function LoginForm() {
   const router = useRouter();
-  const [showPassword, setShowPassword] = useState(false);
-  const [pending, startTransition] = useTransition();
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<LoginData>({
-    resolver: zodResolver(loginSchema),
-    mode: "onSubmit",
+  const [form, setForm] = useState<LoginData>({
+    email: "",
+    password: "",
   });
 
-  const onLogin = async (_values: LoginData) => {
-    startTransition(() => {
-      // Dummy login success
-      router.push("/auth/dashboard");
-    });
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    const parsed = loginSchema.safeParse(form);
+    if (!parsed.success) {
+      setError(parsed.error.issues[0].message);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await login(form);
+
+      setAuthToken(res.token);
+      setUserData(res.data);
+
+      router.push(`/dashboard/${res.data.role}`);
+    } catch (err: any) {
+      setError(err.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit(onLogin)} className="space-y-5">
-      {/* Email */}
-      <div className="space-y-1">
-        <label htmlFor="email" className="text-sm font-medium">
-          Email
-        </label>
-        <input
-          id="email"
-          type="email"
-          autoComplete="email"
-          placeholder="you@example.com"
-          className="h-10 w-full rounded-md border border-black/10 dark:border-white/15 bg-background px-3 text-sm outline-none focus:border-foreground/40"
-          {...register("email")}
-        />
-        {errors.email?.message && (
-          <p className="text-xs text-red-600">{errors.email.message}</p>
+    <div className="min-h-screen flex items-center justify-center px-4">
+      <div
+        className="w-full max-w-md rounded-2xl p-8
+        bg-[var(--background)/60] backdrop-blur-xl
+        shadow-[0_20px_60px_-15px_rgba(0,0,0,0.35)]"
+      >
+        <h1 className="text-3xl font-semibold text-center mb-8">
+          Welcome back
+        </h1>
+
+        {error && (
+          <p className="text-sm text-red-500 text-center mb-5">{error}</p>
         )}
-      </div>
 
-      {/* Password */}
-      <div className="space-y-1">
-        <div className="flex items-center justify-between">
-          <label htmlFor="password" className="text-sm font-medium">
-            Password
-          </label>
-
-          <Link
-            href="/forgot-password"
-            className="text-xs text-muted-foreground hover:underline"
-          >
-            forgot password?
-          </Link>
-        </div>
-
-        <div className="relative">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <input
-            id="password"
-            type={showPassword ? "text" : "password"}
-            autoComplete="current-password"
-            placeholder="••••••"
-            className="h-10 w-full rounded-md border border-black/10 dark:border-white/15 bg-background px-3 pr-10 text-sm outline-none focus:border-foreground/40"
-            {...register("password")}
+            type="email"
+            placeholder="Email"
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+            className="w-full rounded-lg px-4 py-3
+              bg-[var(--foreground)/5]
+              focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]
+              placeholder:text-[var(--foreground)/50]"
+          />
+
+          <input
+            type="password"
+            placeholder="Password"
+            value={form.password}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+            className="w-full rounded-lg px-4 py-3
+              bg-[var(--foreground)/5]
+              focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]
+              placeholder:text-[var(--foreground)/50]"
           />
 
           <button
-            type="button"
-            onClick={() => setShowPassword((prev) => !prev)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-            aria-label="Toggle password visibility"
+            type="submit"
+            disabled={loading}
+            className="w-full py-3 rounded-lg font-semibold
+              bg-[var(--foreground)] text-[var(--background)]
+              hover:opacity-90 transition disabled:opacity-50"
           >
-            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            {loading ? "Logging in..." : "Login"}
           </button>
-        </div>
+        </form>
 
-        {errors.password?.message && (
-          <p className="text-xs text-red-600">{errors.password.message}</p>
-        )}
+        <p className="text-sm text-center mt-6 text-[var(--foreground)/70]">
+          Don’t have an account?{" "}
+          <a href="/register" className="underline font-medium">
+            Sign up
+          </a>
+        </p>
       </div>
-
-      {/* Submit */}
-      <button
-        type="submit"
-        disabled={isSubmitting || pending}
-        className="h-10 w-full rounded-md bg-foreground text-background text-sm font-semibold hover:opacity-90 disabled:opacity-60"
-      >
-        {isSubmitting || pending ? "Logging in..." : "Log in"}
-      </button>
-
-      {/* Footer */}
-      <div className="pt-1 text-center text-sm text-muted-foreground">
-        Don&apos;t have an account?{" "}
-        <Link href="/register" className="font-semibold hover:underline">
-          Sign up
-        </Link>
-      </div>
-    </form>
+    </div>
   );
 }

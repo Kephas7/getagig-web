@@ -12,6 +12,7 @@ export type LoginData = z.infer<typeof loginSchema>;
 export const signupSchema = z
   .object({
     email: z.string().email({ message: "Enter a valid email." }),
+    username: z.string().min(3, { message: "Minimum 3 characters" }),
 
     password: z
       .string()
