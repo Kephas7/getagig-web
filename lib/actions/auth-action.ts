@@ -1,8 +1,8 @@
 "use server";
 import { login, register } from "@/lib/api/auth";
 import { LoginData, RegisterData } from "@/app/(auth)/schema";
-import { success } from "zod";
-
+import { setAuthToken, setUserData, clearAuthCookies } from "../cookies";
+import { redirect } from "next/navigation";
 export const handleRegister = async (data: RegisterData) => {
   try {
     const response = await register(data);
@@ -29,6 +29,8 @@ export const handleLogin = async (data: LoginData) => {
   try {
     const response = await login(data);
     if (response.success) {
+      await setAuthToken(response.token);
+      await setUserData(response.data);
       return {
         success: true,
         message: "Login successful",
@@ -42,4 +44,9 @@ export const handleLogin = async (data: LoginData) => {
   } catch (error: Error | any) {
     return { success: false, message: error.message || "Login action failed" };
   }
+};
+
+export const handleLogout = async () => {
+  await clearAuthCookies();
+  return redirect("/login");
 };
