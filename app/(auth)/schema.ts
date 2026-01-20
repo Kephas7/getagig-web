@@ -1,28 +1,35 @@
 import z from "zod";
 
 export const loginSchema = z.object({
-  email: z.email({ message: "Enter vaild email." }),
+  email: z.string().email({ message: "Enter a valid email." }),
   password: z
     .string()
-    .min(6, { message: "Password must have minimum 6 charcters." }),
+    .min(6, { message: "Password must have at least 6 characters." }),
 });
 
 export type LoginData = z.infer<typeof loginSchema>;
 
 export const signupSchema = z
   .object({
-    name: z.string().min(2, { message: "Enter your name." }),
-    email: z.email({ message: "Enter valid email." }),
+    email: z.string().email({ message: "Enter a valid email." }),
+
     password: z
       .string()
-      .min(6, { message: "Password must have minimum 6 charcters." }),
+      .min(6, { message: "Password must have at least 6 characters." }),
+
     confirmPassword: z
       .string()
-      .min(6, { message: "Password must have minimum 6 charcters." }),
+      .min(6, { message: "Password must have at least 6 characters." }),
+
+    role: z.enum(["musician", "organizer"]),
   })
-  .refine((p) => p.password === p.confirmPassword, {
+  .refine((data) => data.password === data.confirmPassword, {
     path: ["confirmPassword"],
     message: "Passwords do not match",
+  })
+  .refine((data) => !!data.role, {
+    path: ["role"],
+    message: "Please select a role",
   });
 
-export type SignupData = z.infer<typeof signupSchema>;
+export type RegisterData = z.infer<typeof signupSchema>;
