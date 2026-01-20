@@ -6,12 +6,12 @@ import SignupForm from "../_components/SignupForm";
 export default function Page() {
   return (
     <div className="min-h-screen grid grid-cols-1 md:grid-cols-2">
-      <div className="hidden md:flex items-center justify-center bg-white">
+      <div className="hidden md:flex items-center justify-center bg-black">
         <Image
-          src="/images/img2.png"
+          src="/images/signup.png"
           alt="Band Illustration"
-          width={600}
-          height={600}
+          width={500}
+          height={500}
           priority
         />
       </div>
