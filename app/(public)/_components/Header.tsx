@@ -3,28 +3,38 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Music, Home, Search, FileText, User, PlusCircle, Briefcase, LogOut, Menu, X, Info } from "lucide-react";
+import { 
+  Music, Home, Search, FileText, User, PlusCircle, Briefcase, 
+  LogOut, Menu, X, Info, ChevronRight 
+} from "lucide-react";
 import ThemeToggle from "@/app/_components/ThemeToggle";
+import { motion, AnimatePresence } from "framer-motion";
 
 type User = {
   email: string;
   role: "musician" | "organizer";
 };
 
-const PUBLIC_LINKS = [
+type NavLink = {
+  href: string;
+  label: string;
+  icon: any;
+};
+
+const PUBLIC_LINKS: NavLink[] = [
   { href: "/", label: "Home", icon: Home },
   { href: "/about", label: "About", icon: Info },
   { href: "/gigs", label: "Browse Gigs", icon: Search },
 ];
 
-const MUSICIAN_LINKS = [
+const MUSICIAN_LINKS: NavLink[] = [
   { href: "/dashboard/musician", label: "Dashboard", icon: Home },
   { href: "/gigs", label: "Browse Gigs", icon: Search },
   { href: "/applications", label: "Applications", icon: FileText },
   { href: "/profile", label: "Profile", icon: User },
 ];
 
-const ORGANIZER_LINKS = [
+const ORGANIZER_LINKS: NavLink[] = [
   { href: "/dashboard/organizer", label: "Dashboard", icon: Home },
   { href: "/gigs/new", label: "Post Gig", icon: PlusCircle },
   { href: "/gigs/manage", label: "My Gigs", icon: Briefcase },
@@ -36,8 +46,8 @@ export default function Navbar() {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [scrolled, setScrolled] = useState(false);
 
-  // Load user from localStorage
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
@@ -45,8 +55,18 @@ export default function Navbar() {
     }
   }, []);
 
-  const isActive = (href: string) =>
-    href === "/" ? pathname === "/" : pathname?.startsWith(href);
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const isActive = (href: string) => {
+    if (href === "/" && pathname !== "/") return false;
+    return pathname?.startsWith(href);
+  };
 
   const logout = () => {
     localStorage.removeItem("user");
@@ -56,7 +76,6 @@ export default function Navbar() {
     router.push("/login");
   };
 
-  // Determine which menu to show
   const getMenuItems = () => {
     if (!user) return PUBLIC_LINKS;
     if (user.role === "musician") return MUSICIAN_LINKS;
@@ -67,44 +86,59 @@ export default function Navbar() {
   const menuItems = getMenuItems();
 
   return (
-    <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-b border-border shadow-sm">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+    <nav
+      className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
+        scrolled
+          ? "bg-background/80 backdrop-blur-md border-b border-border/50 py-3"
+          : "bg-transparent py-5"
+      }`}
+    >
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
-            <Music className="w-8 h-8 text-primary" />
-            <span className="text-xl font-bold">Get-A-Gig</span>
+          <Link 
+            href="/" 
+            className="flex items-center gap-2 group z-10"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <Music className="h-6 w-6 text-primary transition-transform group-hover:-rotate-12" />
+            <span className="text-lg font-bold tracking-tight">
+              Get-A-Gig
+            </span>
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
             {menuItems.map((item) => {
-              const Icon = item.icon;
+              const active = isActive(item.href);
+              
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-2 text-sm font-medium transition-colors ${
-                    isActive(item.href)
-                      ? "text-foreground"
-                      : "text-muted-foreground hover:text-foreground"
+                  className={`relative py-1 text-sm font-medium transition-colors ${
+                    active ? "text-foreground" : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  {Icon && <Icon className="w-4 h-4" />}
-                  {item.label}
+                  <span>{item.label}</span>
+                  {active && (
+                    <motion.div
+                      layoutId="navbar-underline"
+                      className="absolute left-0 right-0 -bottom-1 h-px bg-primary"
+                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    />
+                  )}
                 </Link>
               );
             })}
           </div>
 
           {/* Right side buttons */}
-          <div className="hidden md:flex items-center gap-4">
-            {/* Theme Toggle */}
+          <div className="hidden md:flex items-center gap-6">
             <ThemeToggle />
             
-            {/* Auth Buttons / User Menu */}
             {!user ? (
-              <>
+              <div className="flex items-center gap-4">
                 <Link
                   href="/login"
                   className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
@@ -113,38 +147,36 @@ export default function Navbar() {
                 </Link>
                 <Link
                   href="/register"
-                  className="inline-flex items-center justify-center h-9 px-4 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+                  className="rounded-full bg-primary px-5 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
                 >
                   Sign up
                 </Link>
-              </>
+              </div>
             ) : (
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 px-3 py-2 bg-muted rounded-lg">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
                   <User className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm font-medium capitalize">
+                  <span className="text-sm font-medium text-muted-foreground capitalize">
                     {user.role}
                   </span>
                 </div>
                 <button
                   onClick={logout}
-                  className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-destructive transition-colors"
-                  title="Logout"
+                  className="text-sm font-medium text-muted-foreground hover:text-destructive transition-colors"
                 >
-                  <LogOut className="w-5 h-5" />
+                  Sign Out
                 </button>
               </div>
             )}
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="flex items-center gap-2 md:hidden">
-            {/* Theme Toggle for mobile */}
+          <div className="flex items-center gap-4 md:hidden">
             <ThemeToggle />
 
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 text-foreground hover:bg-muted rounded-lg transition-colors"
+              className="md:hidden -mr-2 p-2 text-foreground hover:bg-muted/50 rounded-md transition-colors"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? (
@@ -155,70 +187,77 @@ export default function Navbar() {
             </button>
           </div>
         </div>
-
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-border">
-            <div className="flex flex-col gap-2">
-              {menuItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                      isActive(item.href)
-                        ? "bg-muted text-foreground"
-                        : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                    }`}
-                  >
-                    {Icon && <Icon className="w-5 h-5" />}
-                    <span className="font-medium">{item.label}</span>
-                  </Link>
-                );
-              })}
-
-              <div className="border-t border-border mt-2 pt-2">
-                {!user ? (
-                  <>
-                    <Link
-                      href="/login"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="block px-4 py-3 text-muted-foreground hover:bg-muted/50 hover:text-foreground rounded-lg transition-colors font-medium"
-                    >
-                      Log in
-                    </Link>
-                    <Link
-                      href="/register"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="block px-4 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium mt-2"
-                    >
-                      Sign up
-                    </Link>
-                  </>
-                ) : (
-                  <>
-                    <div className="flex items-center gap-2 px-4 py-2 mb-2 bg-muted rounded-lg">
-                      <User className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-sm font-medium capitalize">
-                        {user.email} ({user.role})
-                      </span>
-                    </div>
-                    <button
-                      onClick={logout}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-destructive hover:bg-destructive/10 rounded-lg transition-colors font-medium"
-                    >
-                      <LogOut className="w-5 h-5" />
-                      Logout
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
       </div>
+
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+            className="md:hidden overflow-hidden border-t border-border/50 bg-background"
+          >
+            <div className="px-6 py-6 space-y-6">
+              <div className="flex flex-col gap-4">
+                {menuItems.map((item) => {
+                  const active = isActive(item.href);
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`text-lg font-medium transition-colors ${
+                        active
+                          ? "text-primary"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  );
+                })}
+              </div>
+
+              <div className="h-px bg-border/50" />
+
+              {!user ? (
+                <div className="flex flex-col gap-4">
+                  <Link
+                    href="/login"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="text-base font-medium text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Log in
+                  </Link>
+                  <Link
+                    href="/register"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="inline-flex justify-center rounded-full bg-primary px-5 py-2.5 text-base font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+                  >
+                    Sign up
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <User className="w-4 h-4" />
+                    <span className="text-sm font-medium">{user.email}</span>
+                  </div>
+                  <button
+                    onClick={logout}
+                    className="flex items-center gap-2 text-base font-medium text-destructive hover:text-destructive/80 transition-colors"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Sign Out
+                  </button>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   );
 }

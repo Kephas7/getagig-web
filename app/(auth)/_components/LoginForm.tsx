@@ -30,10 +30,10 @@ export default function LoginForm() {
     try {
       const res = await login(form);
 
-      setAuthToken(res.token);
-      setUserData(res.data);
+      setAuthToken(res.data.token);
+      setUserData(res.data.user);
 
-      router.push(`/dashboard/${res.data.role}`);
+      router.push(`/dashboard/${res.data.user.role}`);
     } catch (err: any) {
       setError(err.message || "Login failed");
     } finally {
