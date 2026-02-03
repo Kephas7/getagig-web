@@ -33,7 +33,7 @@ export default function LoginForm() {
       setAuthToken(res.data.token);
       setUserData(res.data.user);
 
-      router.push(`/dashboard/${res.data.user.role}`);
+      router.push(`/${res.data.user.role}`);
     } catch (err: any) {
       setError(err.message || "Login failed");
     } finally {

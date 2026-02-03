@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import ThemeToggle from "@/app/_components/ThemeToggle";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/app/context/AuthContext";
 
 type User = {
   email: string;
@@ -28,14 +29,14 @@ const PUBLIC_LINKS: NavLink[] = [
 ];
 
 const MUSICIAN_LINKS: NavLink[] = [
-  { href: "/dashboard/musician", label: "Dashboard", icon: Home },
+  { href: "/musician", label: "Dashboard", icon: Home },
   { href: "/gigs", label: "Browse Gigs", icon: Search },
   { href: "/applications", label: "Applications", icon: FileText },
   { href: "/profile", label: "Profile", icon: User },
 ];
 
 const ORGANIZER_LINKS: NavLink[] = [
-  { href: "/dashboard/organizer", label: "Dashboard", icon: Home },
+  { href: "/organizer", label: "Dashboard", icon: Home },
   { href: "/gigs/new", label: "Post Gig", icon: PlusCircle },
   { href: "/gigs/manage", label: "My Gigs", icon: Briefcase },
   { href: "/profile", label: "Profile", icon: User },
@@ -45,15 +46,8 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
+  const { user, logout: contextLogout } = useAuth();
   const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -69,11 +63,8 @@ export default function Navbar() {
   };
 
   const logout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    setUser(null);
+    contextLogout();
     setMobileMenuOpen(false);
-    router.push("/login");
   };
 
   const getMenuItems = () => {
