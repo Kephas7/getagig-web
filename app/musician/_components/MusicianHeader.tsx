@@ -1,20 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { 
-  Music, Home, Search, FileText, User, PlusCircle, Briefcase, 
-  LogOut, Menu, X, Info, ChevronRight 
+  Music, Home, Search, FileText, User, 
+  LogOut, Menu, X 
 } from "lucide-react";
 import ThemeToggle from "@/app/_components/ThemeToggle";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/app/context/AuthContext";
-
-type User = {
-  email: string;
-  role: "musician" | "organizer";
-};
 
 type NavLink = {
   href: string;
@@ -22,15 +17,15 @@ type NavLink = {
   icon: any;
 };
 
-const PUBLIC_LINKS: NavLink[] = [
-  { href: "/", label: "Home", icon: Home },
-  { href: "/about", label: "About", icon: Info },
+const MUSICIAN_LINKS: NavLink[] = [
+  { href: "/musician", label: "Dashboard", icon: Home },
   { href: "/gigs", label: "Browse Gigs", icon: Search },
+  { href: "/applications", label: "Applications", icon: FileText },
+  { href: "/profile", label: "Profile", icon: User },
 ];
 
-export default function Navbar() {
+export default function MusicianHeader() {
   const pathname = usePathname();
-  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, logout: contextLogout } = useAuth();
   const [scrolled, setScrolled] = useState(false);
@@ -44,16 +39,13 @@ export default function Navbar() {
   }, []);
 
   const isActive = (href: string) => {
-    if (href === "/" && pathname !== "/") return false;
-    return pathname?.startsWith(href);
+    return pathname === href || pathname?.startsWith(href + "/");
   };
 
   const logout = () => {
     contextLogout();
     setMobileMenuOpen(false);
   };
-
-  const menuItems = PUBLIC_LINKS;
 
   return (
     <nav
@@ -67,19 +59,19 @@ export default function Navbar() {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link 
-            href="/" 
+            href="/musician" 
             className="flex items-center gap-2 group z-10"
             onClick={() => setMobileMenuOpen(false)}
           >
             <Music className="h-6 w-6 text-primary transition-transform group-hover:-rotate-12" />
             <span className="text-lg font-bold tracking-tight">
-              Get-A-Gig
+              Get-A-Gig <span className="text-xs font-normal text-muted-foreground ml-1">Musician</span>
             </span>
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
-            {menuItems.map((item) => {
+            {MUSICIAN_LINKS.map((item) => {
               const active = isActive(item.href);
               
               return (
@@ -93,7 +85,7 @@ export default function Navbar() {
                   <span>{item.label}</span>
                   {active && (
                     <motion.div
-                      layoutId="navbar-underline"
+                      layoutId="musician-nav-underline"
                       className="absolute left-0 right-0 -bottom-1 h-px bg-primary"
                       transition={{ type: "spring", stiffness: 300, damping: 30 }}
                     />
@@ -107,39 +99,19 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-6">
             <ThemeToggle />
             
-            {!user ? (
+            {user && (
               <div className="flex items-center gap-4">
-                <Link
-                  href="/login"
-                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  Log in
-                </Link>
-                <Link
-                  href="/register"
-                  className="rounded-full bg-primary px-5 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-                >
-                  Sign up
-                </Link>
-              </div>
-            ) : (
-              <div className="flex items-center gap-6">
-                <Link
-                  href={user.role === "musician" ? "/musician" : user.role === "organizer" ? "/organizer" : "/admin"}
-                  className="text-sm font-medium text-primary hover:underline"
-                >
-                  Dashboard
-                </Link>
                 <div className="flex items-center gap-2">
                   <User className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm font-medium text-muted-foreground capitalize">
-                    {user.role}
+                  <span className="text-sm font-medium text-muted-foreground truncate max-w-[150px]">
+                    {user.email}
                   </span>
                 </div>
                 <button
                   onClick={logout}
-                  className="text-sm font-medium text-muted-foreground hover:text-destructive transition-colors"
+                  className="text-sm font-medium text-muted-foreground hover:text-destructive transition-colors flex items-center gap-2"
                 >
+                  <LogOut size={16} />
                   Sign Out
                 </button>
               </div>
@@ -177,7 +149,7 @@ export default function Navbar() {
           >
             <div className="px-6 py-6 space-y-6">
               <div className="flex flex-col gap-4">
-                {menuItems.map((item) => {
+                {MUSICIAN_LINKS.map((item) => {
                   const active = isActive(item.href);
                   return (
                     <Link
@@ -198,32 +170,8 @@ export default function Navbar() {
 
               <div className="h-px bg-border/50" />
 
-              {!user ? (
-                <div className="flex flex-col gap-4">
-                  <Link
-                    href="/login"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="text-base font-medium text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    Log in
-                  </Link>
-                  <Link
-                    href="/register"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="inline-flex justify-center rounded-full bg-primary px-5 py-2.5 text-base font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-                  >
-                    Sign up
-                  </Link>
-                </div>
-              ) : (
+              {user && (
                 <div className="space-y-4">
-                  <Link
-                    href={user.role === "musician" ? "/musician" : user.role === "organizer" ? "/organizer" : "/admin"}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="block text-lg font-medium text-primary hover:underline"
-                  >
-                    Dashboard
-                  </Link>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <User className="w-4 h-4" />
                     <span className="text-sm font-medium">{user.email}</span>

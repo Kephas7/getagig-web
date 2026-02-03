@@ -7,7 +7,7 @@ const adminRoutes = ['/admin'];
 const musicianRoutes = ['/musician'];
 const organizerRoutes = ['/organizer'];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
     const token = await getAuthToken();
     const user = token ? await getUserData() : null;
