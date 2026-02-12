@@ -32,6 +32,28 @@ body {
 }
 
 [data-theme="dark"] {
-  --background: #0a0a0a;
+  --background: #181616;
   --foreground: #ededed;
+}
+
+@utility mesh-gradient {
+  background-color: var(--background);
+  background-image: 
+    radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+    radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+    radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+}
+
+@keyframes float {
+  0% { transform: translateY(0px) translateX(0px); }
+  50% { transform: translateY(-20px) translateX(10px); }
+  100% { transform: translateY(0px) translateX(0px); }
+}
+
+.animate-float {
+  animation: float 10s ease-in-out infinite;
+}
+
+.glass-morphism {
+  @apply bg-[var(--background)/70] backdrop-blur-xl border border-[var(--foreground)/10];
 }
