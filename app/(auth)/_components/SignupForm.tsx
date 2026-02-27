@@ -8,6 +8,7 @@ import { setAuthToken, setUserData } from "@/lib/cookies";
 import { Eye, EyeOff } from "lucide-react";
 
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "@/lib/toast";
 
 export default function SignupForm() {
   const router = useRouter();
@@ -39,12 +40,13 @@ export default function SignupForm() {
       const { confirmPassword, ...payload } = form;
       const res = await register(payload as any);
 
-      setAuthToken(res.token);
-      setUserData(res.data);
+      setAuthToken(res.data.token);
+      setUserData(res.data.user);
 
-      router.push(`/dashboard/${res.data.role}`);
+      toast.success("Account created successfully!");
+      router.push(`/${res.data.user.role}`);
     } catch (err: any) {
-      setError(err.message || "Signup failed");
+      setError(err.response?.data?.message || err.message || "Signup failed");
     } finally {
       setLoading(false);
     }
@@ -65,14 +67,14 @@ export default function SignupForm() {
         <motion.p
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: "auto" }}
-          className="text-sm text-red-500 text-center mb-5 font-medium"
+          className="text-sm text-error text-center mb-5 font-medium"
         >
           {error}
         </motion.p>
       )}
 
       {/* Role Chips */}
-      <div className="flex gap-3 mb-8 p-1 bg-[var(--foreground)/5] rounded-xl">
+      <div className="flex gap-3 mb-8 p-1 bg-foreground/5 rounded-xl">
         {["musician", "organizer"].map((role) => (
           <button
             key={role}
@@ -80,14 +82,14 @@ export default function SignupForm() {
             onClick={() => setForm({ ...form, role: role as any })}
             className={`relative flex-1 py-2.5 rounded-lg text-sm font-bold transition-all z-10 ${
               form.role === role
-                ? "text-[var(--background)]"
-                : "text-[var(--foreground)/60] hover:text-[var(--foreground)]"
+                ? "text-primary-foreground"
+                : "text-foreground/60 hover:text-foreground"
             }`}
           >
             {form.role === role && (
               <motion.div
                 layoutId="role-active"
-                className="absolute inset-0 bg-[var(--foreground)] rounded-lg -z-10 shadow-md"
+                className="absolute inset-0 bg-primary rounded-lg -z-10 shadow-md"
                 transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
               />
             )}
@@ -108,9 +110,9 @@ export default function SignupForm() {
             value={form.username}
             onChange={(e) => setForm({ ...form, username: e.target.value })}
             className="w-full rounded-xl px-4 py-3
-              bg-[var(--foreground)/5] border border-[var(--foreground)/5]
-              focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/20 focus:border-[var(--foreground)]/20
-              placeholder:text-[var(--foreground)/30] transition-all"
+              bg-foreground/5 border border-foreground/10
+              focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/20
+              placeholder:text-foreground/30 transition-all"
           />
         </div>
 
@@ -123,9 +125,9 @@ export default function SignupForm() {
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
             className="w-full rounded-xl px-4 py-3
-              bg-[var(--foreground)/5] border border-[var(--foreground)/5]
-              focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/20 focus:border-[var(--foreground)]/20
-              placeholder:text-[var(--foreground)/30] transition-all"
+              bg-foreground/5 border border-foreground/10
+              focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/20
+              placeholder:text-foreground/30 transition-all"
           />
         </div>
 
@@ -141,9 +143,9 @@ export default function SignupForm() {
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
                 className="w-full rounded-xl px-4 py-3
-                  bg-[var(--foreground)/5] border border-[var(--foreground)/5]
-                  focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/20 focus:border-[var(--foreground)]/20
-                  placeholder:text-[var(--foreground)/30] transition-all"
+                  bg-foreground/5 border border-foreground/10
+                  focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/20
+                  placeholder:text-foreground/30 transition-all"
               />
               <button
                 type="button"
@@ -168,9 +170,9 @@ export default function SignupForm() {
                   setForm({ ...form, confirmPassword: e.target.value })
                 }
                 className="w-full rounded-xl px-4 py-3
-                  bg-[var(--foreground)/5] border border-[var(--foreground)/5]
-                  focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/20 focus:border-[var(--foreground)]/20
-                  placeholder:text-[var(--foreground)/30] transition-all"
+                  bg-foreground/5 border border-foreground/10
+                  focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/20
+                  placeholder:text-foreground/30 transition-all"
               />
               <button
                 type="button"
@@ -189,8 +191,8 @@ export default function SignupForm() {
           type="submit"
           disabled={loading}
           className="w-full py-4 rounded-xl font-bold uppercase tracking-widest text-sm mt-4
-            bg-[var(--foreground)] text-[var(--background)]
-            hover:opacity-95 transition-all shadow-lg disabled:opacity-50"
+            bg-primary text-primary-foreground
+            hover:opacity-90 transition-all shadow-lg disabled:opacity-50"
         >
           {loading ? "Creating account..." : "Sign up"}
         </motion.button>
