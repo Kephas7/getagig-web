@@ -5,13 +5,15 @@ import { useRouter } from "next/navigation";
 import { loginSchema, LoginData } from "../schema";
 import { login } from "@/lib/api/auth";
 import { setAuthToken, setUserData } from "@/lib/cookies";
+import { useAuth } from "@/app/context/AuthContext";
 
-import { Eye, EyeOff, EyeOffIcon } from "lucide-react";
-
+import { Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
+import { toast } from "@/lib/toast";
 
 export default function LoginForm() {
   const router = useRouter();
+  const { checkAuth } = useAuth();
   const [form, setForm] = useState<LoginData>({
     email: "",
     password: "",
@@ -35,12 +37,17 @@ export default function LoginForm() {
     try {
       const res = await login(form);
 
+      // Normalize: backend returns { id } but frontend expects { _id }
+      const userData = { ...res.data.user, _id: res.data.user._id || res.data.user.id };
       setAuthToken(res.data.token);
-      setUserData(res.data.user);
+      setUserData(userData);
+      // Re-sync AuthContext so headers show user info immediately (no refresh needed)
+      await checkAuth();
 
+      toast.success(`Welcome back, ${res.data.user.username}!`);
       router.push(`/${res.data.user.role}`);
     } catch (err: any) {
-      setError(err.message || "Login failed");
+      setError(err.response?.data?.message || err.message || "Login failed");
     } finally {
       setLoading(false);
     }
@@ -61,7 +68,7 @@ export default function LoginForm() {
         <motion.p
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: "auto" }}
-          className="text-sm text-red-500 text-center mb-5 font-medium"
+          className="text-sm text-error text-center mb-5 font-medium"
         >
           {error}
         </motion.p>
@@ -77,9 +84,9 @@ export default function LoginForm() {
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
             className="w-full rounded-xl px-4 py-3.5
-              bg-[var(--foreground)/5] border border-[var(--foreground)/5]
-              focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/20 focus:border-[var(--foreground)]/20
-              placeholder:text-[var(--foreground)/30] transition-all"
+              bg-foreground/5 border border-foreground/10
+              focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/20
+              placeholder:text-foreground/30 transition-all"
           />
         </div>
 
@@ -94,9 +101,9 @@ export default function LoginForm() {
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
               className="w-full rounded-xl px-4 py-3.5
-                bg-[var(--foreground)/5] border border-[var(--foreground)/5]
-                focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/20 focus:border-[var(--foreground)]/20
-                placeholder:text-[var(--foreground)/30] transition-all"
+                bg-foreground/5 border border-foreground/10
+                focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/20
+                placeholder:text-foreground/30 transition-all"
             />
             <button
               type="button"
@@ -123,8 +130,8 @@ export default function LoginForm() {
           type="submit"
           disabled={loading}
           className="w-full py-4 rounded-xl font-bold uppercase tracking-widest text-sm
-            bg-[var(--foreground)] text-[var(--background)]
-            hover:opacity-95 transition-all shadow-lg disabled:opacity-50"
+            bg-primary text-primary-foreground
+            hover:opacity-90 transition-all shadow-lg disabled:opacity-50"
         >
           {loading ? "Logging in..." : "Login"}
         </motion.button>
