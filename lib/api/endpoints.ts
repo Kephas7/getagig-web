@@ -13,6 +13,36 @@ export const API = {
       UPDATE: (id: string) => `/api/admin/users/${id}`,
       DELETE: (id: string) => `/api/admin/users/${id}`,
     },
-
-  }
+  },
+  MUSICIAN: {
+    CREATE: "/api/musicians/profile",
+    GET_OWN: "/api/musicians/profile",
+    UPDATE: "/api/musicians/profile",
+    GET_BY_ID: (id: string) => `/api/musicians/profile/${id}`,
+    UPLOAD_PIC: "/api/musicians/profile-picture",
+    UPLOAD_PHOTOS: "/api/musicians/photos",
+    UPLOAD_VIDEOS: "/api/musicians/videos",
+    UPLOAD_AUDIO: "/api/musicians/audio",
+  },
+  ORGANIZER: {
+    CREATE: "/api/organizers/profile",
+    GET_OWN: "/api/organizers/profile",
+    UPDATE: "/api/organizers/profile",
+    GET_BY_ID: (id: string) => `/api/organizers/profile/${id}`,
+    UPLOAD_PIC: "/api/organizers/profile-picture",
+    UPLOAD_PHOTOS: "/api/organizers/photos",
+    UPLOAD_VIDEOS: "/api/organizers/videos",
+    UPLOAD_DOCS: "/api/organizers/verification-documents",
+  },
+  GIG: {
+    GET_ALL: "/api/gigs",
+    GET_BY_ID: (id: string) => `/api/gigs/${id}`,
+    CREATE: "/api/gigs",
+    UPDATE: (id: string) => `/api/gigs/${id}`,
+    DELETE: (id: string) => `/api/gigs/${id}`,
+  },
+  NOTIFICATION: {
+    GET_ALL: "/api/notifications",
+    MARK_READ: (id: string) => `/api/notifications/${id}/read`,
+  },
 };
