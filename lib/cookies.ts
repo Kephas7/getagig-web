@@ -4,11 +4,12 @@ import { cookies } from "next/headers"
 
 export interface UserData {
     _id: string;
+    id?: string; // backend alias
     email: string;
     username: string;
     role: string;
-    createdAt: string;
-    updatedAt: string;
+    createdAt?: string;
+    updatedAt?: string;
     [key: string]: any;
 }
 export const setAuthToken = async (token: string) => {
@@ -32,7 +33,11 @@ export const setUserData = async (userData: UserData) => {
 export const getUserData = async (): Promise<UserData | null> => {
     const cookieStore = await cookies();
     const userData = cookieStore.get('user_data')?.value || null;
-    return userData ? JSON.parse(userData) : null;
+    if (!userData) return null;
+    const parsed = JSON.parse(userData);
+    // Normalize: ensure _id is always set (backend may return only 'id')
+    if (!parsed._id && parsed.id) parsed._id = parsed.id;
+    return parsed;
 }
 
 export const clearAuthCookies = async () => {
