@@ -25,7 +25,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             const token = await getAuthToken();
             const user = await getUserData();
             setUser(user);
-            setUser(user);
             setIsAuthenticated(!!token && !!user);
         } catch (err) {
             setIsAuthenticated(false);
