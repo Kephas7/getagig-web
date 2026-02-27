@@ -6,6 +6,7 @@ import { resetPasswordSchema } from "../schema";
 import { resetPassword } from "@/lib/api/auth";
 import { Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
+import { toast } from "@/lib/toast";
 
 interface ResetPasswordFormProps {
   token: string;
@@ -35,9 +36,10 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     setLoading(true);
     try {
       await resetPassword(token, form.password);
+      toast.success("Password reset successful! Please login.");
       router.push("/login?reset=success");
     } catch (err: any) {
-      setError(err.message || "Reset failed");
+      setError(err.response?.data?.message || err.message || "Reset failed");
     } finally {
       setLoading(false);
     }
@@ -58,7 +60,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         <motion.p
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: "auto" }}
-          className="text-sm text-red-500 text-center mb-5 font-medium"
+          className="text-sm text-error text-center mb-5 font-medium"
         >
           {error}
         </motion.p>
@@ -76,9 +78,9 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
               className="w-full rounded-xl px-4 py-3.5
-                bg-[var(--foreground)/5] border border-[var(--foreground)/5]
-                focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/20 focus:border-[var(--foreground)]/20
-                placeholder:text-[var(--foreground)/30] transition-all"
+                bg-foreground/5 border border-foreground/10
+                focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/20
+                placeholder:text-foreground/30 transition-all"
             />
             <button
               type="button"
@@ -103,9 +105,9 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
                 setForm({ ...form, confirmPassword: e.target.value })
               }
               className="w-full rounded-xl px-4 py-3.5
-                bg-[var(--foreground)/5] border border-[var(--foreground)/5]
-                focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/20 focus:border-[var(--foreground)]/20
-                placeholder:text-[var(--foreground)/30] transition-all"
+                bg-foreground/5 border border-foreground/10
+                focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/20
+                placeholder:text-foreground/30 transition-all"
             />
             <button
               type="button"
@@ -123,8 +125,8 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           type="submit"
           disabled={loading}
           className="w-full py-4 rounded-xl font-bold uppercase tracking-widest text-sm mt-4
-            bg-[var(--foreground)] text-[var(--background)]
-            hover:opacity-95 transition-all shadow-lg disabled:opacity-50"
+            bg-primary text-primary-foreground
+            hover:opacity-90 transition-all shadow-lg disabled:opacity-50"
         >
           {loading ? "Resetting..." : "Reset Password"}
         </motion.button>
