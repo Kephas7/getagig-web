@@ -6,6 +6,7 @@ import { deleteUser } from "@/lib/api/admin/user";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Edit, Trash2, Shield, Music, Calendar } from "lucide-react";
+import { toast } from "@/lib/toast";
 
 interface UsersTableProps {
   initialUsers: User[];
@@ -26,10 +27,11 @@ export function UsersTable({ initialUsers, token }: UsersTableProps) {
     try {
       await deleteUser(id, token);
       setUsers(users.filter((user) => (user.id || user._id) !== id));
+      toast.success("User deleted successfully");
       router.refresh(); 
     } catch (error) {
       console.error("Failed to delete user", error);
-      alert("Failed to delete user");
+      toast.error("Failed to delete user");
     } finally {
       setLoading(null);
     }
@@ -38,20 +40,20 @@ export function UsersTable({ initialUsers, token }: UsersTableProps) {
   const getRoleIcon = (role: string) => {
     switch (role) {
       case "admin":
-        return <Shield size={16} className="text-red-500" />;
+        return <Shield size={16} className="text-error" />;
       case "musician":
-        return <Music size={16} className="text-blue-500" />;
+        return <Music size={16} className="text-primary" />;
       case "organizer":
-        return <Calendar size={16} className="text-green-500" />;
+        return <Calendar size={16} className="text-success" />;
       default:
         return null;
     }
   };
 
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
+    <div className="bg-card text-card-foreground rounded-lg shadow-lg overflow-hidden border border-border">
+      <table className="min-w-full divide-y divide-border">
+        <thead className="bg-secondary/50">
           <tr>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               User
@@ -108,14 +110,14 @@ export function UsersTable({ initialUsers, token }: UsersTableProps) {
                 <div className="flex justify-end gap-3">
                   <Link
                     href={`/admin/users/${user.id || user._id}/edit`}
-                    className="text-indigo-600 hover:text-indigo-900"
+                    className="text-primary hover:opacity-80 transition-opacity"
                   >
                     <Edit size={18} />
                   </Link>
                   <button
                     onClick={() => handleDelete(user.id || user._id)}
                     disabled={loading === (user.id || user._id)}
-                    className="text-red-600 hover:text-red-900 disabled:opacity-50"
+                    className="text-error hover:opacity-80 transition-opacity disabled:opacity-50"
                   >
                     <Trash2 size={18} />
                   </button>
