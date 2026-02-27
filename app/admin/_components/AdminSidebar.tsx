@@ -15,9 +15,9 @@ export default function AdminSidebar() {
   ];
 
   return (
-    <aside className="w-64 bg-[var(--background)] border-r border-[var(--foreground)/10] h-screen flex flex-col hidden md:flex">
-      <div className="p-6 border-b border-[var(--foreground)/10]">
-        <h1 className="text-2xl font-bold text-[var(--foreground)]">GetAGig</h1>
+    <aside className="w-64 bg-card border-r border-border h-screen flex flex-col hidden md:flex">
+      <div className="p-6 border-b border-border">
+        <h1 className="text-2xl font-bold text-foreground">GetAGig</h1>
       </div>
       <nav className="flex-1 p-4 space-y-2">
         {links.map((link) => {
@@ -30,8 +30,8 @@ export default function AdminSidebar() {
               className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200
                 ${
                   isActive
-                    ? "bg-[var(--foreground)] text-[var(--background)] shadow-md"
-                    : "text-[var(--foreground)/70] hover:bg-[var(--foreground)/5] hover:text-[var(--foreground)]"
+                    ? "bg-primary text-primary-foreground shadow-lg"
+                    : "text-foreground/70 hover:bg-foreground/5 hover:text-foreground"
                 }`}
             >
               <Icon size={20} />
@@ -40,10 +40,10 @@ export default function AdminSidebar() {
           );
         })}
       </nav>
-      <div className="p-4 border-t border-[var(--foreground)/10]">
-        <div className="p-4 rounded-xl bg-[var(--foreground)/5]">
-            <p className="text-xs text-[var(--foreground)/60]">Logged in as</p>
-            <p className="font-semibold text-[var(--foreground)]">Admin</p>
+      <div className="p-4 border-t border-border">
+        <div className="p-4 rounded-xl bg-foreground/5">
+            <p className="text-xs text-foreground/60">Logged in as</p>
+            <p className="font-semibold text-foreground">Admin</p>
         </div>
       </div>
     </aside>
