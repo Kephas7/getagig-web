@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { User, CreateUserSchema, UpdateUserSchema, CreateUserFormValues, UpdateUserFormValues } from "../schema";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "@/lib/toast";
 import { createUser, updateUser } from "@/lib/api/admin/user";
 import { Camera } from "lucide-react";
 
@@ -16,7 +17,7 @@ interface UserFormProps {
 export function UserForm({ initialData, token }: UserFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [mutationError, setMutationError] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(
     initialData?.profilePicture 
       ? (initialData.profilePicture.startsWith('http') ? initialData.profilePicture : `${process.env.NEXT_PUBLIC_API_BASE_URL}${initialData.profilePicture}`)
@@ -43,7 +44,7 @@ export function UserForm({ initialData, token }: UserFormProps) {
 
   const onSubmit = async (data: CreateUserFormValues | UpdateUserFormValues) => {
     setLoading(true);
-    setError(null);
+    setMutationError(null);
 
     const formData = new FormData();
     formData.append("username", data.username);
@@ -59,6 +60,8 @@ export function UserForm({ initialData, token }: UserFormProps) {
       formData.append("profilePicture", data.profilePicture[0]);
     }
 
+    const editingUser = !!initialData;
+
     try {
       if (initialData) {
        
@@ -70,8 +73,11 @@ export function UserForm({ initialData, token }: UserFormProps) {
       // Refresh first to revalidate cache, then navigate
       router.refresh();
       router.push("/admin/users");
-    } catch (err: any) {
-      setError(err.message || "Something went wrong");
+      toast.success(editingUser ? "User updated successfully" : "User created successfully");
+    } catch (error: any) {
+      console.error("Mutation failed:", error);
+      toast.error(error.response?.data?.message || error.message || "Failed to save user");
+      setMutationError(error.response?.data?.message || error.message || "Failed to save user");
     } finally {
       setLoading(false);
     }
@@ -92,9 +98,9 @@ export function UserForm({ initialData, token }: UserFormProps) {
         {initialData ? "Edit User" : "Create User"}
       </h2>
 
-      {error && (
-        <div className="bg-red-50 text-red-500 p-4 rounded mb-6">
-          {error}
+      {mutationError && (
+        <div className="bg-error/10 text-error p-4 rounded-xl mb-6 border border-error/20">
+          {mutationError}
         </div>
       )}
 
@@ -129,7 +135,7 @@ export function UserForm({ initialData, token }: UserFormProps) {
           </div>
           <p className="text-sm text-gray-500">Click to upload photo</p>
           {errors.profilePicture && (
-            <p className="text-red-500 text-sm">{errors.profilePicture.message?.toString()}</p>
+            <p className="text-error text-sm">{errors.profilePicture.message?.toString()}</p>
           )}
         </div>
 
@@ -145,7 +151,7 @@ export function UserForm({ initialData, token }: UserFormProps) {
               placeholder="Username"
             />
             {errors.username && (
-              <p className="text-red-500 text-sm mt-1">{errors.username.message}</p>
+              <p className="text-error text-sm mt-1">{errors.username.message}</p>
             )}
           </div>
 
@@ -161,7 +167,7 @@ export function UserForm({ initialData, token }: UserFormProps) {
               placeholder="Email"
             />
             {errors.email && (
-              <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+              <p className="text-error text-sm mt-1">{errors.email.message}</p>
             )}
           </div>
 
@@ -179,7 +185,7 @@ export function UserForm({ initialData, token }: UserFormProps) {
               <option value="admin">Admin</option>
             </select>
             {errors.role && (
-              <p className="text-red-500 text-sm mt-1">{errors.role.message}</p>
+              <p className="text-error text-sm mt-1">{errors.role.message}</p>
             )}
           </div>
 
@@ -195,7 +201,7 @@ export function UserForm({ initialData, token }: UserFormProps) {
               placeholder="Password"
             />
             {errors.password && (
-              <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
+              <p className="text-error text-sm mt-1">{errors.password.message}</p>
             )}
           </div>
         </div>
