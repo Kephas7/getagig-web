@@ -25,7 +25,7 @@ type NavLink = {
 const PUBLIC_LINKS: NavLink[] = [
   { href: "/", label: "Home", icon: Home },
   { href: "/about", label: "About", icon: Info },
-  { href: "/gigs", label: "Browse Gigs", icon: Search },
+  { href: "/musician/gigs", label: "Browse Gigs", icon: Search },
 ];
 
 export default function Navbar() {
@@ -87,7 +87,7 @@ export default function Navbar() {
                   key={item.href}
                   href={item.href}
                   className={`relative py-1 text-sm font-medium transition-colors ${
-                    active ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                    active ? "text-foreground" : "text-foreground/60 hover:text-foreground"
                   }`}
                 >
                   <span>{item.label}</span>
@@ -111,7 +111,7 @@ export default function Navbar() {
               <div className="flex items-center gap-4">
                 <Link
                   href="/login"
-                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-sm font-medium text-foreground/60 hover:text-foreground transition-colors"
                 >
                   Log in
                 </Link>
@@ -131,14 +131,14 @@ export default function Navbar() {
                   Dashboard
                 </Link>
                 <div className="flex items-center gap-2">
-                  <User className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm font-medium text-muted-foreground capitalize">
+                  <User className="w-4 h-4 text-foreground/60" />
+                  <span className="text-sm font-medium text-foreground/60 capitalize">
                     {user.role}
                   </span>
                 </div>
                 <button
                   onClick={logout}
-                  className="text-sm font-medium text-muted-foreground hover:text-destructive transition-colors"
+                  className="text-sm font-medium text-foreground/60 hover:text-error transition-colors"
                 >
                   Sign Out
                 </button>
@@ -187,7 +187,7 @@ export default function Navbar() {
                       className={`text-lg font-medium transition-colors ${
                         active
                           ? "text-primary"
-                          : "text-muted-foreground hover:text-foreground"
+                          : "text-foreground/60 hover:text-foreground"
                       }`}
                     >
                       {item.label}
@@ -203,7 +203,7 @@ export default function Navbar() {
                   <Link
                     href="/login"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="text-base font-medium text-muted-foreground hover:text-foreground transition-colors"
+                    className="text-base font-medium text-foreground/60 hover:text-foreground transition-colors"
                   >
                     Log in
                   </Link>
@@ -224,13 +224,13 @@ export default function Navbar() {
                   >
                     Dashboard
                   </Link>
-                  <div className="flex items-center gap-2 text-muted-foreground">
+                  <div className="flex items-center gap-2 text-foreground/60">
                     <User className="w-4 h-4" />
                     <span className="text-sm font-medium">{user.email}</span>
                   </div>
                   <button
                     onClick={logout}
-                    className="flex items-center gap-2 text-base font-medium text-destructive hover:text-destructive/80 transition-colors"
+                    className="flex items-center gap-2 text-base font-medium text-error hover:text-error/80 transition-colors"
                   >
                     <LogOut className="w-4 h-4" />
                     Sign Out
