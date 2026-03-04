@@ -3,23 +3,49 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
-import { getOrganizerProfile, createOrganizerProfile, updateOrganizerProfile } from "@/lib/api/organizer";
+import {
+  getOrganizerProfile,
+  createOrganizerProfile,
+  updateOrganizerProfile,
+  requestOrganizerVerification,
+} from "@/lib/api/organizer";
 import { getAuthToken } from "@/lib/cookies";
 import OrganizerHeader from "@/app/organizer/_components/OrganizerHeader";
 import {
-  Save, Loader2, Plus, X, Globe, Building2, Camera,
-  User as UserIcon, CheckCircle, MapPin, Trash2, Calendar
+  Save,
+  Loader2,
+  Plus,
+  X,
+  Globe,
+  Building2,
+  Camera,
+  User as UserIcon,
+  CheckCircle,
+  MapPin,
+  Trash2,
+  Calendar,
 } from "lucide-react";
 import MediaUpload from "@/app/_components/MediaUpload";
-import { uploadOrganizerMedia, deleteOrganizerMedia } from "@/lib/api/organizer";
+import {
+  uploadOrganizerMedia,
+  deleteOrganizerMedia,
+} from "@/lib/api/organizer";
 import { toast } from "@/lib/toast";
 import { API } from "@/lib/api/endpoints";
 import { resolveMediaUrl } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
 const EVENT_TYPE_SUGGESTIONS = [
-  "Weddings", "Corporate Events", "Birthday Parties", "Club Nights",
-  "Concerts", "Festivals", "Private Gigs", "Bar/Restaurant", "Theatre", "Gallery"
+  "Weddings",
+  "Corporate Events",
+  "Birthday Parties",
+  "Club Nights",
+  "Concerts",
+  "Festivals",
+  "Private Gigs",
+  "Bar/Restaurant",
+  "Theatre",
+  "Gallery",
 ];
 const ORG_TYPES = [
   { value: "Individual", label: "Individual Promoter" },
@@ -36,7 +62,10 @@ export default function EditOrganizerProfile() {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
   const [hasProfile, setHasProfile] = useState(false);
-  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [validationErrors, setValidationErrors] = useState<
+    Record<string, string>
+  >({});
+  const [requestingVerification, setRequestingVerification] = useState(false);
 
   const [formData, setFormData] = useState({
     organizationName: "",
@@ -44,13 +73,15 @@ export default function EditOrganizerProfile() {
     phone: "",
     email: "",
     bio: "",
-    location: { city: "", state: "", country: "" },
+    location: "",
     website: "",
     organizationType: "Individual",
     eventTypes: [] as string[],
     profilePicture: "",
     photos: [] as string[],
     verificationDocuments: [] as string[],
+    isVerified: false,
+    verificationRequested: false,
   });
 
   const [newEventType, setNewEventType] = useState("");
@@ -59,7 +90,10 @@ export default function EditOrganizerProfile() {
     const fetchProfile = async () => {
       try {
         const token = await getAuthToken();
-        if (!token) { router.push("/login"); return; }
+        if (!token) {
+          router.push("/login");
+          return;
+        }
         const profileData = await getOrganizerProfile(token);
         if (profileData.success && profileData.data) {
           setFormData({
@@ -68,13 +102,16 @@ export default function EditOrganizerProfile() {
             phone: profileData.data.phone || "",
             email: profileData.data.email || "",
             bio: profileData.data.bio || "",
-            location: profileData.data.location || { city: "", state: "", country: "" },
+            location: profileData.data.location || "",
             website: profileData.data.website || "",
             organizationType: profileData.data.organizationType || "Individual",
             eventTypes: profileData.data.eventTypes || [],
             profilePicture: profileData.data.profilePicture || "",
             photos: profileData.data.photos || [],
             verificationDocuments: profileData.data.verificationDocuments || [],
+            isVerified: profileData.data.isVerified ?? false,
+            verificationRequested:
+              profileData.data.verificationRequested ?? false,
           });
           setHasProfile(true);
         }
@@ -90,17 +127,24 @@ export default function EditOrganizerProfile() {
 
   const validate = () => {
     const errors: Record<string, string> = {};
-    if (!formData.organizationName.trim()) errors.organizationName = "Organization name is required";
-    if (!formData.contactPerson.trim()) errors.contactPerson = "Contact person is required";
-    if (!formData.phone.trim() || formData.phone.trim().length < 10) errors.phone = "Enter a valid phone number (min 10 digits)";
-    if (!formData.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) errors.email = "Enter a valid email address";
-    if (!formData.location.city.trim()) errors.city = "City is required";
-    if (!formData.location.state.trim()) errors.state = "State is required";
-    if (!formData.location.country.trim()) errors.country = "Country is required";
-    if (formData.eventTypes.length === 0) errors.eventTypes = "Add at least one event type";
+    if (!formData.organizationName.trim())
+      errors.organizationName = "Organization name is required";
+    if (!formData.contactPerson.trim())
+      errors.contactPerson = "Contact person is required";
+    if (!formData.phone.trim() || formData.phone.trim().length < 10)
+      errors.phone = "Enter a valid phone number (min 10 digits)";
+    if (
+      !formData.email.trim() ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
+    )
+      errors.email = "Enter a valid email address";
+    if (!formData.location.trim()) errors.location = "Location is required";
+    if (formData.eventTypes.length === 0)
+      errors.eventTypes = "Add at least one event type";
     // Only validate website if provided
     if (formData.website && !/^https?:\/\/.+/.test(formData.website)) {
-      errors.website = "Enter a valid URL (must start with http:// or https://)";
+      errors.website =
+        "Enter a valid URL (must start with http:// or https://)";
     }
     return errors;
   };
@@ -134,7 +178,10 @@ export default function EditOrganizerProfile() {
       toast.success("Profile saved successfully!");
       setTimeout(() => router.push("/organizer/profile"), 1200);
     } catch (err: any) {
-      const msg = err.response?.data?.message || err.response?.data?.errors?.[0]?.message || "Failed to save profile.";
+      const msg =
+        err.response?.data?.message ||
+        err.response?.data?.errors?.[0]?.message ||
+        "Failed to save profile.";
       setError(msg);
       toast.error(msg);
     } finally {
@@ -142,13 +189,20 @@ export default function EditOrganizerProfile() {
     }
   };
 
-  const handleMediaDelete = async (endpoint: string, url: string, field: "photos") => {
+  const handleMediaDelete = async (
+    endpoint: string,
+    url: string,
+    field: "photos",
+  ) => {
     try {
       const token = await getAuthToken();
       if (!token) return;
       const response = await deleteOrganizerMedia(token, endpoint, url);
       if (response.success) {
-        setFormData(prev => ({ ...prev, [field]: prev[field].filter(item => item !== url) }));
+        setFormData((prev) => ({
+          ...prev,
+          [field]: prev[field].filter((item) => item !== url),
+        }));
         toast.success("Media removed");
       }
     } catch (err) {
@@ -160,26 +214,61 @@ export default function EditOrganizerProfile() {
   const addEventType = () => {
     const trimmed = newEventType.trim();
     if (trimmed && !formData.eventTypes.includes(trimmed)) {
-      setFormData(prev => ({ ...prev, eventTypes: [...prev.eventTypes, trimmed] }));
-      setValidationErrors(prev => ({ ...prev, eventTypes: "" }));
+      setFormData((prev) => ({
+        ...prev,
+        eventTypes: [...prev.eventTypes, trimmed],
+      }));
+      setValidationErrors((prev) => ({ ...prev, eventTypes: "" }));
     }
     setNewEventType("");
   };
 
   const removeEventType = (type: string) => {
-    setFormData(prev => ({ ...prev, eventTypes: prev.eventTypes.filter(t => t !== type) }));
+    setFormData((prev) => ({
+      ...prev,
+      eventTypes: prev.eventTypes.filter((t) => t !== type),
+    }));
   };
 
-  if (loading) return (
-    <div className="flex h-screen items-center justify-center bg-background">
-      <div className="flex flex-col items-center gap-4">
-        <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+  const handleRequestVerification = async () => {
+    try {
+      const token = await getAuthToken();
+      if (!token) return;
+
+      setRequestingVerification(true);
+      const response = await requestOrganizerVerification(token);
+
+      if (response?.success) {
+        setFormData((prev) => ({
+          ...prev,
+          verificationRequested: true,
+        }));
+        toast.success("Verification request sent to admin");
+      }
+    } catch (err: any) {
+      toast.error(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Failed to request verification",
+      );
+    } finally {
+      setRequestingVerification(false);
+    }
+  };
+
+  if (loading)
+    return (
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          </div>
+          <p className="text-sm text-muted-foreground font-medium">
+            Loading your profile…
+          </p>
         </div>
-        <p className="text-sm text-muted-foreground font-medium">Loading your profile…</p>
       </div>
-    </div>
-  );
+    );
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -208,7 +297,9 @@ export default function EditOrganizerProfile() {
             {hasProfile ? "The Organizer's Hub" : "Launch Your Venue"}
           </h1>
           <p className="mt-3 text-lg text-foreground/60">
-            {hasProfile ? "Manage your organization and connect with world-class talent." : "Setup your profile to start hosting unforgettable events."}
+            {hasProfile
+              ? "Manage your organization and connect with world-class talent."
+              : "Setup your profile to start hosting unforgettable events."}
           </p>
         </div>
 
@@ -235,77 +326,119 @@ export default function EditOrganizerProfile() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-widest text-foreground/40">Organization Name</label>
+                <label className="text-xs font-bold uppercase tracking-widest text-foreground/40">
+                  Organization Name
+                </label>
                 <input
                   type="text"
                   className={`w-full px-4 py-3.5 rounded-2xl border bg-secondary/20 outline-none transition-all focus:ring-2 focus:ring-primary/25 placeholder:text-foreground/20 ${validationErrors.organizationName ? "border-error/50" : "border-border/40"}`}
                   placeholder="e.g. Blue Note Jazz Club"
                   value={formData.organizationName}
                   onChange={(e) => {
-                    setFormData(p => ({ ...p, organizationName: e.target.value }));
-                    setValidationErrors(p => ({ ...p, organizationName: "" }));
+                    setFormData((p) => ({
+                      ...p,
+                      organizationName: e.target.value,
+                    }));
+                    setValidationErrors((p) => ({
+                      ...p,
+                      organizationName: "",
+                    }));
                   }}
                 />
-                {validationErrors.organizationName && <p className="text-xs text-destructive mt-1">{validationErrors.organizationName}</p>}
+                {validationErrors.organizationName && (
+                  <p className="text-xs text-destructive mt-1">
+                    {validationErrors.organizationName}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-widest text-foreground/40">Contact Person</label>
+                <label className="text-xs font-bold uppercase tracking-widest text-foreground/40">
+                  Contact Person
+                </label>
                 <input
                   type="text"
                   className={`w-full px-4 py-3.5 rounded-2xl border bg-secondary/20 outline-none transition-all focus:ring-2 focus:ring-primary/25 placeholder:text-foreground/20 ${validationErrors.contactPerson ? "border-error/50" : "border-border/40"}`}
                   placeholder="The person in charge"
                   value={formData.contactPerson}
                   onChange={(e) => {
-                    setFormData(p => ({ ...p, contactPerson: e.target.value }));
-                    setValidationErrors(p => ({ ...p, contactPerson: "" }));
+                    setFormData((p) => ({
+                      ...p,
+                      contactPerson: e.target.value,
+                    }));
+                    setValidationErrors((p) => ({ ...p, contactPerson: "" }));
                   }}
                 />
-                {validationErrors.contactPerson && <p className="text-xs text-destructive mt-1">{validationErrors.contactPerson}</p>}
+                {validationErrors.contactPerson && (
+                  <p className="text-xs text-destructive mt-1">
+                    {validationErrors.contactPerson}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-widest text-foreground/40">Phone Number</label>
+                <label className="text-xs font-bold uppercase tracking-widest text-foreground/40">
+                  Phone Number
+                </label>
                 <input
                   type="tel"
                   className={`w-full px-4 py-3.5 rounded-2xl border bg-secondary/20 outline-none transition-all focus:ring-2 focus:ring-primary/25 placeholder:text-foreground/20 ${validationErrors.phone ? "border-error/50" : "border-border/40"}`}
                   placeholder="+1 (555) 000-0000"
                   value={formData.phone}
                   onChange={(e) => {
-                    setFormData(p => ({ ...p, phone: e.target.value }));
-                    setValidationErrors(p => ({ ...p, phone: "" }));
+                    setFormData((p) => ({ ...p, phone: e.target.value }));
+                    setValidationErrors((p) => ({ ...p, phone: "" }));
                   }}
                 />
-                {validationErrors.phone && <p className="text-xs text-destructive mt-1">{validationErrors.phone}</p>}
+                {validationErrors.phone && (
+                  <p className="text-xs text-destructive mt-1">
+                    {validationErrors.phone}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-widest text-foreground/40">Public Email</label>
+                <label className="text-xs font-bold uppercase tracking-widest text-foreground/40">
+                  Public Email
+                </label>
                 <input
                   type="email"
                   className={`w-full px-4 py-3.5 rounded-2xl border bg-secondary/20 outline-none transition-all focus:ring-2 focus:ring-primary/25 placeholder:text-foreground/20 ${validationErrors.email ? "border-error/50" : "border-border/40"}`}
                   placeholder="bookings@yourvenue.com"
                   value={formData.email}
                   onChange={(e) => {
-                    setFormData(p => ({ ...p, email: e.target.value }));
-                    setValidationErrors(p => ({ ...p, email: "" }));
+                    setFormData((p) => ({ ...p, email: e.target.value }));
+                    setValidationErrors((p) => ({ ...p, email: "" }));
                   }}
                 />
-                {validationErrors.email && <p className="text-xs text-destructive mt-1">{validationErrors.email}</p>}
+                {validationErrors.email && (
+                  <p className="text-xs text-destructive mt-1">
+                    {validationErrors.email}
+                  </p>
+                )}
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-widest text-foreground/40">Organization Type</label>
+                <label className="text-xs font-bold uppercase tracking-widest text-foreground/40">
+                  Organization Type
+                </label>
                 <div className="relative">
                   <select
                     className="w-full px-4 py-3.5 rounded-2xl border border-border/40 bg-secondary/20 outline-none focus:ring-2 focus:ring-primary/25 transition-all appearance-none font-bold"
                     value={formData.organizationType}
-                    onChange={(e) => setFormData(p => ({ ...p, organizationType: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((p) => ({
+                        ...p,
+                        organizationType: e.target.value,
+                      }))
+                    }
                   >
                     {ORG_TYPES.map(({ value, label }) => (
-                      <option key={value} value={value}>{label}</option>
+                      <option key={value} value={value}>
+                        {label}
+                      </option>
                     ))}
                   </select>
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-foreground/40">
@@ -315,25 +448,35 @@ export default function EditOrganizerProfile() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-widest text-foreground/40">Official Website</label>
+                <label className="text-xs font-bold uppercase tracking-widest text-foreground/40">
+                  Official Website
+                </label>
                 <input
                   type="url"
                   className={`w-full px-4 py-3.5 rounded-2xl border bg-secondary/20 outline-none transition-all focus:ring-2 focus:ring-primary/25 placeholder:text-foreground/20 ${validationErrors.website ? "border-error/50" : "border-border/40"}`}
                   placeholder="https://yourstage.com"
                   value={formData.website}
                   onChange={(e) => {
-                    setFormData(p => ({ ...p, website: e.target.value }));
-                    setValidationErrors(p => ({ ...p, website: "" }));
+                    setFormData((p) => ({ ...p, website: e.target.value }));
+                    setValidationErrors((p) => ({ ...p, website: "" }));
                   }}
                 />
-                {validationErrors.website && <p className="text-xs text-destructive mt-1">{validationErrors.website}</p>}
+                {validationErrors.website && (
+                  <p className="text-xs text-destructive mt-1">
+                    {validationErrors.website}
+                  </p>
+                )}
               </div>
             </div>
 
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-bold uppercase tracking-widest text-foreground/40">Mission Statement (Bio)</label>
-                <span className="text-[10px] font-bold text-foreground/20">{formData.bio.length}/1000</span>
+                <label className="text-xs font-bold uppercase tracking-widest text-foreground/40">
+                  Mission Statement (Bio)
+                </label>
+                <span className="text-[10px] font-bold text-foreground/20">
+                  {formData.bio.length}/1000
+                </span>
               </div>
               <textarea
                 rows={6}
@@ -341,7 +484,9 @@ export default function EditOrganizerProfile() {
                 className="w-full px-4 py-3.5 rounded-2xl border border-border/40 bg-secondary/20 outline-none transition-all focus:ring-2 focus:ring-primary/25 resize-none placeholder:text-foreground/20"
                 placeholder="Describe your organization, the kind of events you host, and what you look for in musicians…"
                 value={formData.bio}
-                onChange={(e) => setFormData(p => ({ ...p, bio: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((p) => ({ ...p, bio: e.target.value }))
+                }
               />
             </div>
           </section>
@@ -352,22 +497,24 @@ export default function EditOrganizerProfile() {
               <span className="h-6 w-1 bg-primary rounded-full" />
               The Venue (Location)
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              {(["city", "state", "country"] as const).map((field) => (
-                <div key={field} className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-widest text-foreground/40 capitalize">{field}</label>
-                  <input
-                    type="text"
-                    className={`w-full px-4 py-3.5 rounded-2xl border bg-secondary/20 outline-none transition-all focus:ring-2 focus:ring-primary/25 ${validationErrors[field] ? "border-error/50" : "border-border/40"}`}
-                    value={formData.location[field]}
-                    onChange={(e) => {
-                      setFormData(p => ({ ...p, location: { ...p.location, [field]: e.target.value } }));
-                      setValidationErrors(p => ({ ...p, [field]: "" }));
-                    }}
-                  />
-                  {validationErrors[field] && <p className="text-xs text-destructive mt-1">{validationErrors[field]}</p>}
-                </div>
-              ))}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold uppercase tracking-widest text-foreground/40">
+                Location
+              </label>
+              <input
+                type="text"
+                className={`w-full px-4 py-3.5 rounded-2xl border bg-secondary/20 outline-none transition-all focus:ring-2 focus:ring-primary/25 ${validationErrors.location ? "border-error/50" : "border-border/40"}`}
+                value={formData.location}
+                onChange={(e) => {
+                  setFormData((p) => ({ ...p, location: e.target.value }));
+                  setValidationErrors((p) => ({ ...p, location: "" }));
+                }}
+              />
+              {validationErrors.location && (
+                <p className="text-xs text-destructive mt-1">
+                  {validationErrors.location}
+                </p>
+              )}
             </div>
           </section>
 
@@ -380,14 +527,27 @@ export default function EditOrganizerProfile() {
 
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <p className="text-xs font-bold uppercase tracking-widest text-foreground/40">Event Types</p>
-                {validationErrors.eventTypes && <p className="text-xs text-error">{validationErrors.eventTypes}</p>}
+                <p className="text-xs font-bold uppercase tracking-widest text-foreground/40">
+                  Event Types
+                </p>
+                {validationErrors.eventTypes && (
+                  <p className="text-xs text-error">
+                    {validationErrors.eventTypes}
+                  </p>
+                )}
               </div>
               <div className="flex flex-wrap gap-2">
-                {formData.eventTypes.map(type => (
-                  <span key={type} className="inline-flex items-center gap-2 bg-foreground text-background px-4 py-1.5 rounded-full text-xs font-bold tracking-wide uppercase">
+                {formData.eventTypes.map((type) => (
+                  <span
+                    key={type}
+                    className="inline-flex items-center gap-2 bg-foreground text-background px-4 py-1.5 rounded-full text-xs font-bold tracking-wide uppercase"
+                  >
                     {type}
-                    <button type="button" onClick={() => removeEventType(type)} className="hover:scale-110 transition-transform">
+                    <button
+                      type="button"
+                      onClick={() => removeEventType(type)}
+                      className="hover:scale-110 transition-transform"
+                    >
                       <X size={12} strokeWidth={3} />
                     </button>
                   </span>
@@ -401,13 +561,20 @@ export default function EditOrganizerProfile() {
                   value={newEventType}
                   list="event-type-suggestions"
                   onChange={(e) => setNewEventType(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addEventType())}
+                  onKeyDown={(e) =>
+                    e.key === "Enter" && (e.preventDefault(), addEventType())
+                  }
                 />
                 <datalist id="event-type-suggestions">
-                  {EVENT_TYPE_SUGGESTIONS.map(s => <option key={s} value={s} />)}
+                  {EVENT_TYPE_SUGGESTIONS.map((s) => (
+                    <option key={s} value={s} />
+                  ))}
                 </datalist>
-                <button type="button" onClick={addEventType}
-                  className="px-4 py-3 bg-secondary/40 hover:bg-secondary/60 rounded-2xl transition-all font-bold">
+                <button
+                  type="button"
+                  onClick={addEventType}
+                  className="px-4 py-3 bg-secondary/40 hover:bg-secondary/60 rounded-2xl transition-all font-bold"
+                >
                   <Plus size={20} />
                 </button>
               </div>
@@ -423,15 +590,23 @@ export default function EditOrganizerProfile() {
 
             {/* Profile Picture */}
             <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Profile Picture</h3>
+              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                Profile Picture
+              </h3>
               <div className="flex items-start gap-5">
                 <div className="shrink-0">
                   {formData.profilePicture ? (
                     <div className="relative w-28 h-28 rounded-2xl overflow-hidden border-2 border-border group">
-                      <img src={resolveMediaUrl(formData.profilePicture)} alt="Profile" className="w-full h-full object-cover" />
+                      <img
+                        src={resolveMediaUrl(formData.profilePicture)}
+                        alt="Profile"
+                        className="w-full h-full object-cover"
+                      />
                       <button
                         type="button"
-                        onClick={() => setFormData(p => ({ ...p, profilePicture: "" }))}
+                        onClick={() =>
+                          setFormData((p) => ({ ...p, profilePicture: "" }))
+                        }
                         className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <Trash2 size={20} className="text-white" />
@@ -439,7 +614,10 @@ export default function EditOrganizerProfile() {
                     </div>
                   ) : (
                     <div className="w-28 h-28 rounded-2xl border-2 border-dashed border-border flex items-center justify-center bg-muted/30">
-                      <Building2 size={32} className="text-muted-foreground/40" />
+                      <Building2
+                        size={32}
+                        className="text-muted-foreground/40"
+                      />
                     </div>
                   )}
                 </div>
@@ -448,8 +626,22 @@ export default function EditOrganizerProfile() {
                     label="Upload Logo / Profile Photo"
                     accept="image/*"
                     responseField="profilePicture"
-                    uploadFn={(file) => getAuthToken().then(token => uploadOrganizerMedia(token!, API.ORGANIZER.UPLOAD_PIC, "profilePicture", file))}
-                    onUploadSuccess={(url) => setFormData(p => ({ ...p, profilePicture: url as string }))}
+                    uploadFn={(file) =>
+                      getAuthToken().then((token) =>
+                        uploadOrganizerMedia(
+                          token!,
+                          API.ORGANIZER.UPLOAD_PIC,
+                          "profilePicture",
+                          file,
+                        ),
+                      )
+                    }
+                    onUploadSuccess={(url) =>
+                      setFormData((p) => ({
+                        ...p,
+                        profilePicture: url as string,
+                      }))
+                    }
                   />
                 </div>
               </div>
@@ -461,21 +653,46 @@ export default function EditOrganizerProfile() {
                 <Camera size={14} /> Gallery Photos
               </h3>
               <MediaUpload
-                multiple maxFiles={10}
+                multiple
+                maxFiles={10}
                 label="Upload Organization / Event Photos"
                 accept="image/*"
                 responseField="photos"
-                uploadFn={(files) => getAuthToken().then(token => uploadOrganizerMedia(token!, API.ORGANIZER.UPLOAD_PHOTOS, "photos", files))}
-                onUploadSuccess={(urls) => setFormData(p => ({ ...p, photos: urls as string[] }))}
+                uploadFn={(files) =>
+                  getAuthToken().then((token) =>
+                    uploadOrganizerMedia(
+                      token!,
+                      API.ORGANIZER.UPLOAD_PHOTOS,
+                      "photos",
+                      files,
+                    ),
+                  )
+                }
+                onUploadSuccess={(urls) =>
+                  setFormData((p) => ({ ...p, photos: urls as string[] }))
+                }
               />
               {formData.photos.length > 0 && (
                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
                   {formData.photos.map((url, i) => (
-                    <div key={i} className="group relative aspect-square rounded-xl overflow-hidden border border-border bg-muted">
-                      <img src={resolveMediaUrl(url)} alt={`Photo ${i + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                    <div
+                      key={i}
+                      className="group relative aspect-square rounded-xl overflow-hidden border border-border bg-muted"
+                    >
+                      <img
+                        src={resolveMediaUrl(url)}
+                        alt={`Photo ${i + 1}`}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                      />
                       <button
                         type="button"
-                        onClick={() => handleMediaDelete(API.ORGANIZER.UPLOAD_PHOTOS, url, "photos")}
+                        onClick={() =>
+                          handleMediaDelete(
+                            API.ORGANIZER.UPLOAD_PHOTOS,
+                            url,
+                            "photos",
+                          )
+                        }
                         className="absolute top-1.5 right-1.5 p-1.5 bg-black/60 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <Trash2 size={13} />
@@ -489,55 +706,133 @@ export default function EditOrganizerProfile() {
             {/* Verification Documents */}
             <div className="space-y-4">
               <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
-                <CheckCircle size={14} className="text-emerald-500" /> Business Verification
+                <CheckCircle size={14} className="text-emerald-500" /> Business
+                Verification
               </h3>
               <p className="text-[10px] text-muted-foreground font-medium italic">
-                Upload business licenses, tax forms, or other legal documents to get verified and build trust with talent.
+                Upload business licenses, tax forms, or other legal documents to
+                get verified and build trust with talent.
               </p>
               <MediaUpload
-                multiple maxFiles={5}
+                multiple
+                maxFiles={5}
                 label="Add Verification Documents"
                 accept=".pdf,image/*"
                 responseField="verificationDocuments"
-                uploadFn={(files) => getAuthToken().then(token => uploadOrganizerMedia(token!, API.ORGANIZER.UPLOAD_DOCS, "verificationDocuments", files))}
-                onUploadSuccess={(urls) => setFormData(p => ({ ...p, verificationDocuments: [...formData.verificationDocuments, ...(urls as string[])] }))}
+                uploadFn={(files) =>
+                  getAuthToken().then((token) =>
+                    uploadOrganizerMedia(
+                      token!,
+                      API.ORGANIZER.UPLOAD_DOCS,
+                      "verificationDocuments",
+                      files,
+                    ),
+                  )
+                }
+                onUploadSuccess={(urls) =>
+                  setFormData((p) => ({
+                    ...p,
+                    verificationDocuments: [
+                      ...formData.verificationDocuments,
+                      ...(urls as string[]),
+                    ],
+                  }))
+                }
               />
-              {formData.verificationDocuments && formData.verificationDocuments.length > 0 && (
-                <div className="space-y-2 pt-2">
-                  {formData.verificationDocuments.map((url, i) => (
-                    <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/10 group">
-                      <span className="text-xs font-bold truncate max-w-[200px]">{url.split('/').pop()}</span>
-                      <button
-                        type="button"
-                        onClick={() => handleMediaDelete(API.ORGANIZER.UPLOAD_DOCS, url, "verificationDocuments" as any)} // Cast as any because handleMediaDelete doesn't have it yet, or better fix handleMediaDelete
-                        className="p-1 text-muted-foreground hover:text-destructive"
+              {formData.verificationDocuments &&
+                formData.verificationDocuments.length > 0 && (
+                  <div className="space-y-2 pt-2">
+                    {formData.verificationDocuments.map((url, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center justify-between p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/10 group"
                       >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
+                        <span className="text-xs font-bold truncate max-w-[200px]">
+                          {url.split("/").pop()}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleMediaDelete(
+                              API.ORGANIZER.UPLOAD_DOCS,
+                              url,
+                              "verificationDocuments" as any,
+                            )
+                          } // Cast as any because handleMediaDelete doesn't have it yet, or better fix handleMediaDelete
+                          className="p-1 text-muted-foreground hover:text-destructive"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
             </div>
           </section>
 
           {/* ── Submit ── */}
           <div className="flex flex-col sm:flex-row sm:justify-between items-center gap-6 pt-6 translate-y-4">
-            <button
-              type="button"
-              onClick={() => router.back()}
-              className="w-full sm:w-auto px-8 py-4 rounded-2xl border border-border/40 text-sm font-bold uppercase tracking-widest hover:bg-secondary/40 transition-all"
-            >
-              Discard Changes
-            </button>
-            <button
-              type="submit"
-              disabled={saving || saved}
-              className="w-full sm:w-auto px-12 py-4 rounded-2xl bg-foreground text-background text-sm font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-2xl disabled:opacity-40"
-            >
-              {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : saved ? <CheckCircle size={20} /> : <Save size={20} />}
-              {saving ? "Processing..." : saved ? "Published" : hasProfile ? "Update Stage" : "Launch Profile"}
-            </button>
+            <div className="w-full sm:w-auto flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => router.back()}
+                className="w-full sm:w-auto px-8 py-4 rounded-2xl border border-border/40 text-sm font-bold uppercase tracking-widest hover:bg-secondary/40 transition-all"
+              >
+                Discard Changes
+              </button>
+
+              {hasProfile && !formData.isVerified && (
+                <button
+                  type="button"
+                  onClick={handleRequestVerification}
+                  disabled={
+                    requestingVerification || formData.verificationRequested
+                  }
+                  className="w-full sm:w-auto px-6 py-4 rounded-2xl border border-primary/30 text-primary text-xs font-black uppercase tracking-[0.15em] hover:bg-primary/10 transition-all disabled:opacity-50"
+                >
+                  {formData.verificationRequested
+                    ? "Request Pending"
+                    : requestingVerification
+                      ? "Requesting..."
+                      : "Request Verification"}
+                </button>
+              )}
+            </div>
+
+            <div className="w-full sm:w-auto flex items-center gap-3">
+              {(formData.isVerified || formData.verificationRequested) && (
+                <span
+                  className={`inline-flex items-center rounded-full px-3 py-2 text-xs font-bold uppercase tracking-wider ${
+                    formData.isVerified
+                      ? "bg-success/10 text-success border border-success/25"
+                      : "bg-warning/10 text-warning border border-warning/25"
+                  }`}
+                >
+                  {formData.isVerified ? "Verified" : "Verification Pending"}
+                </span>
+              )}
+
+              <button
+                type="submit"
+                disabled={saving || saved}
+                className="w-full sm:w-auto px-12 py-4 rounded-2xl bg-foreground text-background text-sm font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-2xl disabled:opacity-40"
+              >
+                {saving ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : saved ? (
+                  <CheckCircle size={20} />
+                ) : (
+                  <Save size={20} />
+                )}
+                {saving
+                  ? "Processing..."
+                  : saved
+                    ? "Published"
+                    : hasProfile
+                      ? "Update Profile"
+                      : "Launch Profile"}
+              </button>
+            </div>
           </div>
         </form>
       </main>
