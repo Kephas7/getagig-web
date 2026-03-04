@@ -17,7 +17,7 @@ export default function AuthBackground() {
           repeat: Infinity,
           ease: "linear",
         }}
-        className="absolute -top-[10%] -left-[5%] w-[40%] h-[40%] rounded-full bg-purple-500/20 blur-[100px]"
+        className="absolute -top-[10%] -left-[5%] h-[40%] w-[40%] rounded-full bg-white/8 blur-[100px]"
       />
       <motion.div
         animate={{
@@ -30,7 +30,11 @@ export default function AuthBackground() {
           repeat: Infinity,
           ease: "linear",
         }}
-        className="absolute top-[20%] -right-[10%] w-[35%] h-[35%] rounded-full bg-blue-500/10 blur-[100px]"
+        className="absolute -right-[10%] top-[20%] h-[35%] w-[35%] rounded-full blur-[100px]"
+        style={{
+          backgroundColor:
+            "color-mix(in srgb, var(--spotlight) 22%, transparent)",
+        }}
       />
       <motion.div
         animate={{
@@ -42,7 +46,15 @@ export default function AuthBackground() {
           repeat: Infinity,
           ease: "linear",
         }}
-        className="absolute -bottom-[10%] left-[20%] w-[45%] h-[45%] rounded-full bg-pink-500/15 blur-[100px]"
+        className="absolute -bottom-[10%] left-[20%] h-[45%] w-[45%] rounded-full bg-white/6 blur-[100px]"
+      />
+
+      <div
+        className="absolute inset-x-0 top-0 h-64"
+        style={{
+          background:
+            "linear-gradient(180deg, color-mix(in srgb, var(--spotlight) 18%, transparent) 0%, transparent 100%)",
+        }}
       />
     </div>
   );
