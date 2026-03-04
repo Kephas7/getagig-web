@@ -8,9 +8,22 @@ import OrganizerHeader from "@/app/organizer/_components/OrganizerHeader";
 import { useAuth } from "@/app/context/AuthContext";
 import { motion } from "framer-motion";
 import {
-  MapPin, Music, User as UserIcon, Calendar,
-  DollarSign, Loader2, Mic2, Star, Camera, Video as VideoIcon
+  ArrowLeft,
+  MapPin,
+  Music,
+  User as UserIcon,
+  Calendar,
+  DollarSign,
+  Loader2,
+  Mic2,
+  MessageSquare,
+  Camera,
+  Video as VideoIcon,
+  CheckCircle2,
 } from "lucide-react";
+import { getAuthToken } from "@/lib/cookies";
+import { startConversation } from "@/lib/api/message";
+import { toast } from "@/lib/toast";
 import { resolveMediaUrl } from "@/lib/utils";
 
 const fadeUp = (delay = 0) => ({
@@ -21,10 +34,12 @@ const fadeUp = (delay = 0) => ({
 
 export default function PublicMusicianProfilePage() {
   const { id } = useParams();
+  const router = useRouter();
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);
   const [error, setError] = useState("");
+  const [isMessaging, setIsMessaging] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -41,51 +56,148 @@ export default function PublicMusicianProfilePage() {
     fetchProfile();
   }, [id]);
 
-  if (loading) return (
-    <div className="flex h-screen items-center justify-center bg-background">
-      <div className="flex flex-col items-center gap-4">
-        <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+  if (loading)
+    return (
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          </div>
+          <p className="text-sm text-muted-foreground font-medium">
+            Loading profile…
+          </p>
         </div>
-        <p className="text-sm text-muted-foreground font-medium">Loading profile…</p>
       </div>
-    </div>
-  );
+    );
 
-  if (error || !profile) return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-background">
-      <div className="p-8 bg-destructive/10 border border-destructive/20 text-destructive rounded-3xl max-w-md text-center space-y-4">
-        <p className="font-semibold">{error || "Profile not found"}</p>
-        <button onClick={() => window.location.reload()} className="text-sm underline opacity-70 hover:opacity-100">Retry</button>
+  if (error || !profile)
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6 bg-background">
+        <div className="p-8 bg-destructive/10 border border-destructive/20 text-destructive rounded-3xl max-w-md text-center space-y-4">
+          <p className="font-semibold">{error || "Profile not found"}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="text-sm underline opacity-70 hover:opacity-100"
+          >
+            Retry
+          </button>
+        </div>
       </div>
-    </div>
-  );
+    );
 
-  const hasMedia = profile?.photos?.length > 0 || profile?.videos?.length > 0 || profile?.audioSamples?.length > 0;
+  const hasMedia =
+    profile?.photos?.length > 0 ||
+    profile?.videos?.length > 0 ||
+    profile?.audioSamples?.length > 0;
+
+  const currentUserId = user?._id || user?.id;
+  const recipientUserId =
+    typeof profile?.userId === "string"
+      ? profile.userId
+      : profile?.userId?._id || profile?.userId?.id || "";
+  const canMessageMusician =
+    Boolean(user) &&
+    Boolean(recipientUserId) &&
+    Boolean(currentUserId) &&
+    String(recipientUserId) !== String(currentUserId);
+
+  const handleBack = () => {
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back();
+      return;
+    }
+
+    if (user?.role === "organizer") {
+      router.push("/organizer");
+      return;
+    }
+
+    if (user?.role === "admin") {
+      router.push("/admin");
+      return;
+    }
+
+    router.push("/musician");
+  };
+
+  const handleMessageMusician = async () => {
+    if (!canMessageMusician) return;
+
+    setIsMessaging(true);
+    try {
+      const token = await getAuthToken();
+      if (!token) {
+        toast.error("Please log in to send messages.");
+        router.push("/login");
+        return;
+      }
+
+      const response = await startConversation(token, String(recipientUserId));
+      const conversationId = response?.data?._id;
+
+      if (!conversationId) {
+        toast.error("Unable to open conversation.");
+        return;
+      }
+
+      router.push(`/messages/${conversationId}`);
+    } catch {
+      toast.error("Failed to start conversation.");
+    } finally {
+      setIsMessaging(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
-      {user?.role === 'organizer' ? <OrganizerHeader /> : <MusicianHeader />}
+      {user?.role === "organizer" ? (
+        <OrganizerHeader />
+      ) : user?.role === "musician" ? (
+        <MusicianHeader />
+      ) : null}
 
-      <main className="mx-auto max-w-7xl px-5 lg:px-8 pt-28 pb-20">
+      <main className="mx-auto max-w-6xl px-5 lg:px-8 pt-28 pb-16">
+        <div className="mb-6 flex items-center justify-between gap-3">
+          <button
+            type="button"
+            onClick={handleBack}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-border bg-card text-sm font-semibold text-foreground hover:bg-muted transition-colors"
+          >
+            <ArrowLeft size={16} />
+            Back
+          </button>
+
+          {canMessageMusician && (
+            <button
+              type="button"
+              onClick={handleMessageMusician}
+              disabled={isMessaging}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-colors disabled:opacity-60"
+            >
+              <MessageSquare size={16} />
+              {isMessaging ? "Opening..." : "Message"}
+            </button>
+          )}
+        </div>
 
         {/* ── Hero Card ── */}
-        <motion.div {...fadeUp(0)} className="relative rounded-[2.5rem] overflow-hidden mb-10 border border-border/60 shadow-2xl bg-card">
-          {/* Cover */}
-          <div className="h-64 bg-gradient-to-br from-violet-600 via-fuchsia-600 to-primary relative overflow-hidden">
-            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-          </div>
+        <motion.div
+          {...fadeUp(0)}
+          className="relative rounded-3xl overflow-hidden mb-8 border border-border/70 shadow-sm bg-card"
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-transparent to-emerald-500/10 pointer-events-none" />
 
           {/* Profile Row */}
-          <div className="px-8 md:px-12 pb-10">
-            <div className="flex flex-col md:flex-row md:items-end gap-6 -mt-20 mb-8 relative z-10">
+          <div className="px-6 md:px-8 py-6 md:py-7">
+            <div className="flex flex-col md:flex-row md:items-end gap-5 mb-6 relative z-10">
               {/* Avatar */}
-              <div 
-                className="group relative h-40 w-40 rounded-[2rem] border-[6px] border-card bg-muted overflow-hidden shadow-2xl shrink-0"
-              >
+              <div className="group relative h-32 w-32 md:h-36 md:w-36 rounded-2xl border border-border/60 bg-muted overflow-hidden shrink-0">
                 {profile?.profilePicture ? (
-                  <img src={resolveMediaUrl(profile.profilePicture)} alt={profile.stageName} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                  <img
+                    src={resolveMediaUrl(profile.profilePicture)}
+                    alt={profile.stageName}
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
                 ) : (
                   <div className="h-full w-full flex items-center justify-center bg-primary/10">
                     <UserIcon size={56} className="text-primary/50" />
@@ -94,17 +206,17 @@ export default function PublicMusicianProfilePage() {
               </div>
 
               {/* Name + meta */}
-              <div className="flex-1 min-w-0 pb-2">
+              <div className="flex-1 min-w-0">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div>
-                    <h1 className="text-4xl md:text-5xl font-black tracking-tight text-foreground truncate drop-shadow-sm">
+                    <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-foreground truncate">
                       {profile?.stageName}
                     </h1>
                     <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground mt-3 font-medium">
                       {profile?.location && (
                         <span className="flex items-center gap-1.5">
                           <MapPin size={15} className="text-primary" />
-                          {profile.location.city}, {profile.location.state}
+                          {profile.location}
                         </span>
                       )}
                       {profile?.experienceYears !== undefined && (
@@ -114,13 +226,34 @@ export default function PublicMusicianProfilePage() {
                         </span>
                       )}
                       {profile?.isAvailable !== undefined && (
-                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${
-                          profile.isAvailable
-                            ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
-                            : "bg-rose-500/10 text-rose-600 border-rose-500/20"
-                        }`}>
-                          <span className={`h-2 w-2 rounded-full ${profile.isAvailable ? "bg-emerald-500 animate-pulse" : "bg-rose-500"}`} />
-                          {profile.isAvailable ? "Available to Book" : "Currently Busy"}
+                        <span
+                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide border ${
+                            profile.isAvailable
+                              ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                              : "bg-rose-500/10 text-rose-600 border-rose-500/20"
+                          }`}
+                        >
+                          <span
+                            className={`h-2 w-2 rounded-full ${profile.isAvailable ? "bg-emerald-500 animate-pulse" : "bg-rose-500"}`}
+                          />
+                          {profile.isAvailable
+                            ? "Available to Book"
+                            : "Currently Busy"}
+                        </span>
+                      )}
+                      {(profile?.isVerified ||
+                        profile?.verificationRequested) && (
+                        <span
+                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide border ${
+                            profile?.isVerified
+                              ? "bg-success/10 text-success border-success/20"
+                              : "bg-primary/10 text-primary border-primary/20"
+                          }`}
+                        >
+                          <CheckCircle2 size={13} />
+                          {profile?.isVerified
+                            ? "Verified Artist"
+                            : "Verification Pending"}
                         </span>
                       )}
                     </div>
@@ -132,19 +265,26 @@ export default function PublicMusicianProfilePage() {
             {/* Quick stat chips */}
             <div className="flex flex-wrap gap-3">
               {profile?.hourlyRate && (
-                <div className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-primary/5 border border-primary/10 text-sm font-bold text-primary shadow-sm">
+                <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-primary/10 border border-primary/20 text-sm font-semibold text-primary">
                   <DollarSign size={16} strokeWidth={2.5} />
-                  ${profile.hourlyRate} <span className="text-muted-foreground font-normal">/ hr</span>
+                  Rs.
+                  {profile.hourlyRate}{" "}
+                  <span className="text-muted-foreground font-normal">
+                    / hr
+                  </span>
                 </div>
               )}
               {profile?.instruments?.slice(0, 4).map((inst: string) => (
-                <div key={inst} className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-secondary/50 border border-border/50 text-sm font-bold text-foreground shadow-sm">
+                <div
+                  key={inst}
+                  className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-secondary/50 border border-border/50 text-sm font-medium text-foreground"
+                >
                   <Music size={14} className="text-primary/70" />
                   {inst}
                 </div>
               ))}
               {profile?.instruments?.length > 4 && (
-                <div className="flex items-center px-4 py-2.5 rounded-2xl bg-secondary/30 border border-border/30 text-sm font-bold text-muted-foreground">
+                <div className="flex items-center px-3.5 py-2 rounded-xl bg-secondary/30 border border-border/30 text-sm font-medium text-muted-foreground">
                   +{profile.instruments.length - 4} more
                 </div>
               )}
@@ -153,42 +293,54 @@ export default function PublicMusicianProfilePage() {
         </motion.div>
 
         {/* ── Body Grid ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left — Bio + Media */}
-          <div className="lg:col-span-2 space-y-8">
-
+          <div className="lg:col-span-2 space-y-6">
             {/* Bio */}
-            <motion.section {...fadeUp(0.1)} className="rounded-[2rem] border border-border/60 bg-card p-10 shadow-lg relative overflow-hidden">
-               <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-[4rem] -z-10" />
-              <h2 className="text-xl font-bold mb-6 flex items-center gap-3 text-foreground">
-                <span className="h-8 w-1.5 bg-gradient-to-b from-primary to-violet-500 rounded-full" />
+            <motion.section
+              {...fadeUp(0.1)}
+              className="rounded-3xl border border-border/60 bg-card p-7 md:p-8 shadow-sm"
+            >
+              <h2 className="text-lg font-semibold mb-4 flex items-center gap-2 text-foreground">
+                <span className="h-5 w-1 bg-primary rounded-full" />
                 About the Artist
               </h2>
               {profile?.bio && (
-                 <p className="text-muted-foreground leading-8 text-lg whitespace-pre-wrap">{profile.bio}</p>
+                <p className="text-muted-foreground leading-7 whitespace-pre-wrap">
+                  {profile.bio}
+                </p>
               )}
             </motion.section>
 
             {/* Media Gallery */}
-            <motion.section {...fadeUp(0.15)} className="rounded-[2rem] border border-border/60 bg-card p-10 shadow-lg">
-              <h2 className="text-xl font-bold mb-8 flex items-center gap-3 text-foreground">
-                <span className="h-8 w-1.5 bg-gradient-to-b from-violet-500 to-fuchsia-500 rounded-full" />
+            <motion.section
+              {...fadeUp(0.15)}
+              className="rounded-3xl border border-border/60 bg-card p-7 md:p-8 shadow-sm"
+            >
+              <h2 className="text-lg font-semibold mb-6 flex items-center gap-2 text-foreground">
+                <span className="h-5 w-1 bg-primary rounded-full" />
                 Portfolio & Media
               </h2>
 
               {hasMedia ? (
-                <div className="space-y-10">
+                <div className="space-y-8">
                   {/* Photos */}
                   {profile?.photos?.length > 0 && (
                     <div>
                       <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2 bg-primary/10 rounded-xl text-primary"><Camera size={18} /></div>
-                        <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Photos</h3>
+                        <div className="p-2 bg-primary/10 rounded-xl text-primary">
+                          <Camera size={18} />
+                        </div>
+                        <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                          Photos
+                        </h3>
                       </div>
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                         {profile.photos.map((photo: string, i: number) => (
-                          <div key={i} className="group aspect-square rounded-2xl overflow-hidden border border-border/50 bg-muted shadow-sm hover:shadow-md transition-all">
+                          <div
+                            key={i}
+                            className="group aspect-square rounded-xl overflow-hidden border border-border/50 bg-muted"
+                          >
                             <img
                               src={resolveMediaUrl(photo)}
                               alt={`Photo ${i + 1}`}
@@ -202,15 +354,26 @@ export default function PublicMusicianProfilePage() {
 
                   {/* Videos */}
                   {profile?.videos?.length > 0 && (
-                     <div>
+                    <div>
                       <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2 bg-rose-500/10 rounded-xl text-rose-500"><VideoIcon size={18} /></div>
-                        <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Videos</h3>
+                        <div className="p-2 bg-rose-500/10 rounded-xl text-rose-500">
+                          <VideoIcon size={18} />
+                        </div>
+                        <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                          Videos
+                        </h3>
                       </div>
                       <div className="space-y-5">
                         {profile.videos.map((video: string, i: number) => (
-                          <div key={i} className="rounded-3xl overflow-hidden border border-border/50 bg-black shadow-lg">
-                            <video src={resolveMediaUrl(video)} controls className="w-full aspect-video" />
+                          <div
+                            key={i}
+                            className="rounded-xl overflow-hidden border border-border/50 bg-black"
+                          >
+                            <video
+                              src={resolveMediaUrl(video)}
+                              controls
+                              className="w-full aspect-video"
+                            />
                           </div>
                         ))}
                       </div>
@@ -220,53 +383,77 @@ export default function PublicMusicianProfilePage() {
                   {/* Audio */}
                   {profile?.audioSamples?.length > 0 && (
                     <div>
-                       <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2 bg-amber-500/10 rounded-xl text-amber-500"><Mic2 size={18} /></div>
-                        <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Audio Samples</h3>
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-amber-500/10 rounded-xl text-amber-500">
+                          <Mic2 size={18} />
+                        </div>
+                        <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                          Audio Samples
+                        </h3>
                       </div>
                       <div className="grid grid-cols-1 gap-3">
-                        {profile.audioSamples.map((audio: string, i: number) => (
-                          <div key={i} className="flex items-center gap-4 p-5 rounded-3xl border border-border/50 bg-secondary/20 hover:bg-secondary/40 transition-colors">
-                            <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-primary to-violet-600 flex items-center justify-center shrink-0 shadow-lg shadow-primary/20 text-white">
-                              <Music size={20} />
+                        {profile.audioSamples.map(
+                          (audio: string, i: number) => (
+                            <div
+                              key={i}
+                              className="flex items-center gap-4 p-4 rounded-xl border border-border/50 bg-secondary/20 hover:bg-secondary/30 transition-colors"
+                            >
+                              <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 text-primary">
+                                <Music size={20} />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wide">
+                                  Track {i + 1}
+                                </p>
+                                <audio
+                                  src={resolveMediaUrl(audio)}
+                                  controls
+                                  className="w-full h-8"
+                                />
+                              </div>
                             </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs font-bold text-muted-foreground mb-2 uppercase tracking-wide">Track {i + 1}</p>
-                              <audio src={resolveMediaUrl(audio)} controls className="w-full h-8" />
-                            </div>
-                          </div>
-                        ))}
+                          ),
+                        )}
                       </div>
                     </div>
                   )}
                 </div>
               ) : (
-                <div className="py-20 text-center border-2 border-dashed border-border/60 rounded-[2rem] bg-secondary/5">
+                <div className="py-14 text-center border border-dashed border-border/60 rounded-xl bg-secondary/5">
                   <div className="h-16 w-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4 text-muted-foreground/50">
-                     <Music size={32} />
+                    <Music size={32} />
                   </div>
-                  <h3 className="text-lg font-bold text-foreground">No Media Uploaded</h3>
+                  <h3 className="text-lg font-semibold text-foreground">
+                    No Media Uploaded
+                  </h3>
                 </div>
               )}
             </motion.section>
           </div>
 
           {/* Right — Sidebar */}
-          <div className="space-y-8">
-            
+          <div className="space-y-6">
             {/* Specializations */}
-            <motion.div {...fadeUp(0.1)} className="rounded-[2rem] border border-border/60 bg-card p-8 shadow-lg">
-              <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
+            <motion.div
+              {...fadeUp(0.1)}
+              className="rounded-3xl border border-border/60 bg-card p-6 shadow-sm"
+            >
+              <h3 className="text-base font-semibold mb-5 flex items-center gap-2">
                 <Music size={20} className="text-primary" />
                 Specializations
               </h3>
 
               {profile?.instruments?.length > 0 && (
                 <div className="mb-6">
-                  <p className="text-[10px] uppercase font-black tracking-widest text-muted-foreground mb-3">Instruments</p>
+                  <p className="text-[10px] uppercase font-semibold tracking-wide text-muted-foreground mb-3">
+                    Instruments
+                  </p>
                   <div className="flex flex-wrap gap-2">
                     {profile.instruments.map((inst: string) => (
-                      <span key={inst} className="px-4 py-2 rounded-xl bg-primary/10 border border-primary/20 text-xs font-bold text-primary">
+                      <span
+                        key={inst}
+                        className="px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/20 text-xs font-medium text-primary"
+                      >
                         {inst}
                       </span>
                     ))}
@@ -276,10 +463,15 @@ export default function PublicMusicianProfilePage() {
 
               {profile?.genres?.length > 0 && (
                 <div>
-                  <p className="text-[10px] uppercase font-black tracking-widest text-muted-foreground mb-3">Genres</p>
+                  <p className="text-[10px] uppercase font-semibold tracking-wide text-muted-foreground mb-3">
+                    Genres
+                  </p>
                   <div className="flex flex-wrap gap-2">
                     {profile.genres.map((genre: string) => (
-                      <span key={genre} className="px-4 py-2 rounded-xl bg-violet-500/10 border border-violet-500/20 text-xs font-bold text-violet-600 dark:text-violet-400">
+                      <span
+                        key={genre}
+                        className="px-3 py-1.5 rounded-lg bg-sky-500/10 border border-sky-500/20 text-xs font-medium text-sky-700 dark:text-sky-300"
+                      >
                         {genre}
                       </span>
                     ))}
@@ -289,47 +481,43 @@ export default function PublicMusicianProfilePage() {
             </motion.div>
 
             {/* Booking Info */}
-            <motion.div {...fadeUp(0.15)} className="rounded-[2rem] border border-primary/20 bg-gradient-to-br from-primary/10 via-card to-violet-500/5 p-8 shadow-lg relative overflow-hidden">
-               <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
-              <h3 className="text-lg font-bold mb-6 flex items-center gap-2 relative z-10">
+            <motion.div
+              {...fadeUp(0.15)}
+              className="rounded-3xl border border-border/60 bg-card p-6 shadow-sm"
+            >
+              <h3 className="text-base font-semibold mb-5 flex items-center gap-2">
                 <DollarSign size={20} className="text-primary" />
                 Booking Info
               </h3>
 
-              <div className="space-y-5 relative z-10">
-                <div className="flex items-center justify-between p-4 bg-background/50 backdrop-blur-sm rounded-2xl border border-white/10 shadow-sm">
-                  <span className="text-sm font-semibold text-muted-foreground">Hourly Rate</span>
-                  <span className="text-2xl font-black text-foreground">
-                    ${profile?.hourlyRate}<span className="text-sm font-normal text-muted-foreground">/hr</span>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-3.5 bg-background rounded-xl border border-border/60">
+                  <span className="text-sm font-semibold text-muted-foreground">
+                    Hourly Rate
+                  </span>
+                  <span className="text-xl font-semibold text-foreground">
+                    Rs. {profile?.hourlyRate}
+                    <span className="text-sm font-normal text-muted-foreground">
+                      /hr
+                    </span>
                   </span>
                 </div>
-                
-                <div className="flex items-center justify-between p-4 bg-background/50 backdrop-blur-sm rounded-2xl border border-white/10 shadow-sm">
-                  <span className="text-sm font-semibold text-muted-foreground">Availability</span>
-                  <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
-                    profile?.isAvailable ? "text-emerald-500" : "text-rose-500"
-                  }`}>
+
+                <div className="flex items-center justify-between p-3.5 bg-background rounded-xl border border-border/60">
+                  <span className="text-sm font-semibold text-muted-foreground">
+                    Availability
+                  </span>
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide ${
+                      profile?.isAvailable
+                        ? "text-emerald-500"
+                        : "text-rose-500"
+                    }`}
+                  >
                     {profile?.isAvailable ? "Available" : "Busy"}
                   </span>
                 </div>
               </div>
-            </motion.div>
-
-            {/* Rating placeholder (UI flair) */}
-            <motion.div {...fadeUp(0.2)} className="rounded-[2rem] border border-border/60 bg-card p-8 shadow-lg">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-lg font-bold flex items-center gap-2">
-                  <Star size={20} className="text-amber-500" fill="currentColor" />
-                  Rating
-                </h3>
-                <span className="text-3xl font-black text-foreground">5.0</span>
-              </div>
-              <div className="flex gap-1 mb-3">
-                {[1,2,3,4,5].map(s => (
-                  <Star key={s} size={20} className="text-amber-400 fill-amber-400" />
-                ))}
-              </div>
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Based on 0 reviews</p>
             </motion.div>
           </div>
         </div>
