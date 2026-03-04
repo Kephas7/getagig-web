@@ -46,7 +46,9 @@ export default function ChatPage() {
     return participants.find((p) => String(p._id) === String(senderId));
   };
 
-  const otherUser = participants.find((p) => String(p._id) !== String(user?._id));
+  const otherUser = participants.find(
+    (p) => String(p._id) !== String(user?._id),
+  );
 
   const fetchData = async () => {
     try {
@@ -146,7 +148,10 @@ export default function ChatPage() {
                     <User size={24} className="text-muted-foreground" />
                   )}
                 </div>
-                <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-emerald-500 border-2 border-background" />
+                <span
+                  className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-background"
+                  style={{ backgroundColor: "var(--spotlight)" }}
+                />
               </div>
               <div>
                 <h2 className="font-black text-foreground">
@@ -205,7 +210,9 @@ export default function ChatPage() {
                     </div>
                   )}
 
-                  <div className={`max-w-[72%] flex flex-col ${mine ? "items-end" : "items-start"}`}>
+                  <div
+                    className={`max-w-[72%] flex flex-col ${mine ? "items-end" : "items-start"}`}
+                  >
                     {/* Sender name (only show at first message in a group) */}
                     {!mine && isFirst && (
                       <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground mb-1 ml-1">
