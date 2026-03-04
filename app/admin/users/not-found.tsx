@@ -1,17 +1,15 @@
-import Link from 'next/link';
+import Link from "next/link";
 
 export default function NotFound() {
   return (
     <div className="flex h-[50vh] flex-col items-center justify-center gap-4">
-      <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-        User Not Found
-      </h2>
-      <p className="text-gray-500 dark:text-gray-400">
+      <h2 className="text-xl font-semibold text-foreground">User Not Found</h2>
+      <p className="text-foreground/60">
         Could not find the requested user resource.
       </p>
       <Link
         href="/admin/users"
-        className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        className="rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/40"
       >
         Return to Users
       </Link>
