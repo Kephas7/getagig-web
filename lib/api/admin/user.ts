@@ -48,12 +48,16 @@ export const getUserById = async (id: string, token?: string) => {
 
 export const updateUser = async (id: string, userData: any, token?: string) => {
   try {
-    const response = await axiosInstance.put(API.ADMIN.USER.UPDATE(id), userData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        ...getHeaders(token),
+    const response = await axiosInstance.put(
+      API.ADMIN.USER.UPDATE(id),
+      userData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          ...getHeaders(token),
+        },
       },
-    });
+    );
     return response.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.message || "Failed to update user");
@@ -68,5 +72,58 @@ export const deleteUser = async (id: string, token?: string) => {
     return response.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.message || "Failed to delete user");
+  }
+};
+
+export const verifyMusician = async (
+  userId: string,
+  isVerified: boolean,
+  token?: string,
+  rejectionReason?: string,
+) => {
+  try {
+    const response = await axiosInstance.patch(
+      API.MUSICIAN.VERIFY,
+      {
+        userId,
+        isVerified,
+        ...(rejectionReason ? { rejectionReason } : {}),
+      },
+      {
+        headers: getHeaders(token),
+      },
+    );
+    return response.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message || "Failed to update musician verification",
+    );
+  }
+};
+
+export const verifyOrganizer = async (
+  userId: string,
+  isVerified: boolean,
+  token?: string,
+  rejectionReason?: string,
+) => {
+  try {
+    const response = await axiosInstance.patch(
+      API.ORGANIZER.VERIFY,
+      {
+        userId,
+        isVerified,
+        ...(rejectionReason ? { rejectionReason } : {}),
+      },
+      {
+        headers: getHeaders(token),
+      },
+    );
+    return response.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message ||
+        "Failed to update organizer verification",
+    );
   }
 };
