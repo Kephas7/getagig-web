@@ -3,7 +3,17 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Music, Home, PlusCircle, Briefcase, User, LogOut, Menu, X, MessageSquare, Bell } from "lucide-react";
+import {
+  Music,
+  Home,
+  Briefcase,
+  User,
+  LogOut,
+  Menu,
+  X,
+  MessageSquare,
+  Bell,
+} from "lucide-react";
 import ThemeToggle from "@/app/_components/ThemeToggle";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/app/context/AuthContext";
@@ -11,7 +21,6 @@ import { useSocket } from "@/app/context/SocketContext";
 
 const ORGANIZER_LINKS = [
   { href: "/organizer", label: "Dashboard", icon: Home },
-  { href: "/organizer/gigs/new", label: "Post Gig", icon: PlusCircle },
   { href: "/organizer/gigs", label: "My Gigs", icon: Briefcase },
   { href: "/messages", label: "Messages", icon: MessageSquare, badge: true },
   { href: "/organizer/profile", label: "Profile", icon: User },
@@ -44,8 +53,8 @@ export default function OrganizerHeader() {
     <header
       className={`fixed top-0 inset-x-0 z-50 transition-all duration-500 ${
         scrolled
-          ? "py-2 bg-background/70 backdrop-blur-xl border-b border-border/40 shadow-sm"
-          : "py-4 bg-transparent"
+          ? "py-2 bg-background/90 backdrop-blur-xl border-b border-border/50 shadow-sm"
+          : "py-3 bg-background/70 backdrop-blur-lg border-b border-border/35"
       }`}
     >
       <div className="mx-auto max-w-7xl px-5 lg:px-8">
@@ -56,7 +65,7 @@ export default function OrganizerHeader() {
             className="flex items-center gap-2.5 group shrink-0"
             onClick={() => setMobileMenuOpen(false)}
           >
-            <div className="h-8 w-8 rounded-xl bg-primary flex items-center justify-center shadow-sm group-hover:shadow-primary/40 group-hover:scale-105 transition-all">
+            <div className="h-9 w-9 rounded-xl bg-primary flex items-center justify-center shadow-sm group-hover:shadow-primary/40 group-hover:scale-105 transition-all">
               <Music className="h-4 w-4 text-primary-foreground" />
             </div>
             <span className="text-base font-bold tracking-tight">
@@ -68,7 +77,7 @@ export default function OrganizerHeader() {
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="hidden md:flex items-center gap-1.5">
             {ORGANIZER_LINKS.map((item) => {
               const active = isActive(item.href);
               const Icon = item.icon;
@@ -79,7 +88,7 @@ export default function OrganizerHeader() {
                   href={item.href}
                   className={`relative flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors duration-150 ${
                     active
-                      ? "text-foreground bg-foreground/8"
+                      ? "text-foreground bg-primary/10 ring-1 ring-primary/30"
                       : "text-foreground/60 hover:text-foreground hover:bg-foreground/5"
                   }`}
                 >
@@ -92,13 +101,6 @@ export default function OrganizerHeader() {
                     )}
                   </div>
                   <span>{item.label}</span>
-                  {active && (
-                    <motion.span
-                      layoutId="organizer-pill"
-                      className="absolute inset-0 rounded-lg ring-1 ring-primary/30 bg-primary/8"
-                      transition={{ type: "spring", stiffness: 350, damping: 28 }}
-                    />
-                  )}
                 </Link>
               );
             })}
