@@ -12,6 +12,7 @@ import {
 import { getAuthToken } from "@/lib/cookies";
 import MusicianHeader from "@/app/musician/_components/MusicianHeader";
 import OrganizerHeader from "@/app/organizer/_components/OrganizerHeader";
+import AdminHeader from "@/app/admin/_components/AdminHeader";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Bell,
@@ -31,28 +32,43 @@ const TYPE_META: Record<
 > = {
   new_message: {
     icon: MessageSquare,
-    color: "text-blue-500",
-    bg: "bg-blue-500/10",
+    color: "text-primary",
+    bg: "bg-primary/10",
   },
   new_application: {
     icon: Briefcase,
-    color: "text-violet-500",
-    bg: "bg-violet-500/10",
+    color: "text-foreground",
+    bg: "bg-foreground/10",
   },
   application_accepted: {
     icon: CheckCircle,
-    color: "text-emerald-500",
-    bg: "bg-emerald-500/10",
+    color: "text-primary",
+    bg: "bg-primary/10",
   },
   application_rejected: {
     icon: XCircle,
-    color: "text-destructive",
-    bg: "bg-destructive/10",
+    color: "text-muted-foreground",
+    bg: "bg-muted",
   },
   gig_update: {
     icon: Info,
-    color: "text-amber-500",
-    bg: "bg-amber-500/10",
+    color: "text-foreground",
+    bg: "bg-foreground/10",
+  },
+  verification_request: {
+    icon: Bell,
+    color: "text-primary",
+    bg: "bg-primary/10",
+  },
+  verification_approved: {
+    icon: CheckCircle,
+    color: "text-success",
+    bg: "bg-success/10",
+  },
+  verification_rejected: {
+    icon: XCircle,
+    color: "text-warning",
+    bg: "bg-warning/10",
   },
   system: { icon: Bell, color: "text-primary", bg: "bg-primary/10" },
 };
@@ -112,7 +128,7 @@ export default function NotificationsPage() {
       if (!token) return;
       await markNotificationRead(token, id);
       setNotifications((prev) =>
-        prev.map((n) => (n._id === id ? { ...n, isRead: true } : n))
+        prev.map((n) => (n._id === id ? { ...n, isRead: true } : n)),
       );
     } catch {}
   };
@@ -137,7 +153,7 @@ export default function NotificationsPage() {
       router.push(
         user?.role === "organizer"
           ? `/organizer/gigs`
-          : `/musician/applications`
+          : `/musician/applications`,
       );
     } else if (
       (notif.type === "application_accepted" ||
@@ -145,11 +161,26 @@ export default function NotificationsPage() {
       notif.relatedId
     ) {
       router.push(`/musician/applications`);
+    } else if (notif.type === "verification_request") {
+      router.push(`/admin/users`);
+    } else if (
+      notif.type === "verification_approved" ||
+      notif.type === "verification_rejected"
+    ) {
+      if (user?.role === "organizer") {
+        router.push(`/organizer/profile`);
+      } else if (user?.role === "musician") {
+        router.push(`/musician/profile`);
+      }
     }
   };
 
   const Header =
-    user?.role === "organizer" ? OrganizerHeader : MusicianHeader;
+    user?.role === "admin"
+      ? AdminHeader
+      : user?.role === "organizer"
+        ? OrganizerHeader
+        : MusicianHeader;
   const unread = notifications.filter((n) => !n.isRead).length;
 
   if (loading) {
@@ -242,7 +273,9 @@ export default function NotificationsPage() {
                       <div className="flex items-start justify-between gap-3">
                         <p
                           className={`text-sm font-bold ${
-                            notif.isRead ? "text-foreground/70" : "text-foreground"
+                            notif.isRead
+                              ? "text-foreground/70"
+                              : "text-foreground"
                           }`}
                         >
                           {notif.title}
@@ -266,7 +299,6 @@ export default function NotificationsPage() {
             </AnimatePresence>
           </div>
         )}
-
       </main>
     </div>
   );
