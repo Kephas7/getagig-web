@@ -2,89 +2,135 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Music, MapPin, DollarSign, ArrowRight, ShieldCheck, Zap, Star } from "lucide-react";
+import {
+  Music,
+  MapPin,
+  DollarSign,
+  ArrowRight,
+  ShieldCheck,
+  Zap,
+  Star,
+  CheckCircle2,
+} from "lucide-react";
 
 export default function Home() {
   const features = [
-    { icon: Music, title: "Find Your Sound", desc: "Discover gigs that match your unique genre and style perfectly." },
-    { icon: MapPin, title: "Local & Touring", desc: "From hometown bars to cross-country corporate events, find gigs anywhere." },
-    { icon: DollarSign, title: "Secure Payments", desc: "Transparent pay rates and secure platform handling for peace of mind." },
-    { icon: ShieldCheck, title: "Verified Organizers", desc: "We vet our event hosts so you can focus entirely on your performance." },
-    { icon: Zap, title: "Instant Connect", desc: "Direct messaging and real-time notifications keep you in the loop." },
-    { icon: Star, title: "Build Your Rep", desc: "Gain reviews and level up your profile to land bigger, better gigs." },
+    {
+      icon: Music,
+      title: "Find Your Sound",
+      desc: "Discover gigs that match your unique genre and style perfectly.",
+    },
+    {
+      icon: MapPin,
+      title: "Local & Touring",
+      desc: "From hometown bars to cross-country corporate events, find gigs anywhere.",
+    },
+    {
+      icon: DollarSign,
+      title: "Secure Payments",
+      desc: "Transparent pay rates and secure platform handling for peace of mind.",
+    },
+    {
+      icon: ShieldCheck,
+      title: "Verified Organizers",
+      desc: "We vet our event hosts so you can focus entirely on your performance.",
+    },
+    {
+      icon: Zap,
+      title: "Instant Connect",
+      desc: "Direct messaging and real-time notifications keep you in the loop.",
+    },
+    {
+      icon: Star,
+      title: "Build Your Rep",
+      desc: "Gain reviews and level up your profile to land bigger, better gigs.",
+    },
+  ];
+
+  const highlights = [
+    "Create a profile in minutes",
+    "Apply to verified gigs",
+    "Chat directly with organizers",
   ];
 
   return (
-    <div className="min-h-screen bg-background selection:bg-primary/30 selection:text-primary-foreground overflow-hidden">
-      
-      {/* Navbar (Public) */}
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/40 glass-morphism py-4">
-        <div className="mx-auto max-w-7xl px-6 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="bg-primary text-primary-foreground p-2 rounded-xl">
-              <Music size={20} />
-            </div>
-            <span className="font-black text-xl tracking-tighter">Get-a-Gig</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link href="/login" className="text-sm font-bold text-muted-foreground hover:text-foreground transition-colors px-4 py-2">
-              Log in
-            </Link>
-            <Link href="/register" className="text-sm font-bold bg-foreground text-background px-5 py-2.5 rounded-full hover:scale-105 active:scale-95 transition-all">
-              Sign up free
-            </Link>
-          </div>
-        </div>
-      </nav>
-
+    <div className="selection:bg-primary/20 selection:text-foreground">
       {/* Hero Section */}
-      <section className="relative pt-40 pb-20 md:pt-52 md:pb-32 px-6">
-        <div className="absolute inset-0 z-0 mesh-gradient opacity-60" />
-        
+      <section className="relative overflow-hidden rounded-3xl border border-border/60 bg-card px-6 py-14 md:px-10 md:py-16">
+        <div className="absolute inset-0 z-0 mesh-gradient opacity-40" />
+
         <div className="relative z-10 mx-auto max-w-5xl text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-xs font-black uppercase tracking-widest mb-8 border border-primary/20 backdrop-blur-sm"
+            className="mb-7 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-primary"
           >
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"></span>
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-primary"></span>
             </span>
-            The #1 Network for Live Music
+            Trusted by Musicians & Organizers
           </motion.div>
-          
+
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-5xl md:text-7xl font-black tracking-tighter leading-[1.1] text-foreground mb-8"
+            className="mb-6 text-4xl font-black tracking-tight text-foreground md:text-6xl"
           >
-            Stop waiting. <br className="hidden md:block" />
-            Start <span className="gradient-text">Playing.</span>
+            Find the right gig. <br className="hidden md:block" />
+            Book faster with <span className="gradient-text">Get-a-Gig</span>.
           </motion.h1>
-          
+
           <motion.p
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-lg md:text-xl text-muted-foreground font-medium max-w-2xl mx-auto mb-12"
+            className="mx-auto mb-10 max-w-2xl text-base font-medium text-muted-foreground md:text-lg"
           >
-            Connect directly with venues, event organizers, and studios looking for your exact sound. Book gigs, build your network, and get paid.
+            Connect directly with venues, event organizers, and studios looking
+            for your exact sound. Build reputation, grow your network, and get
+            booked with confidence.
           </motion.p>
-          
+
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.25 }}
+            className="mb-10 flex flex-wrap items-center justify-center gap-4"
+          >
+            {highlights.map((item) => (
+              <div
+                key={item}
+                className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/70 px-4 py-2 text-sm text-foreground"
+              >
+                <CheckCircle2 size={16} className="text-primary" />
+                {item}
+              </div>
+            ))}
+          </motion.div>
+
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
-            <Link href="/register?role=musician" className="w-full sm:w-auto px-8 py-4 rounded-full bg-primary text-primary-foreground font-bold text-lg shadow-xl shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-1 active:translate-y-0 transition-all group flex items-center justify-center gap-2">
+            <Link
+              href="/register?role=musician"
+              className="group flex w-full items-center justify-center gap-2 rounded-full bg-primary px-7 py-3.5 text-base font-semibold text-primary-foreground transition-all hover:bg-primary/90 sm:w-auto"
+            >
               I'm a Musician
-              <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+              <ArrowRight
+                size={18}
+                className="transition-transform group-hover:translate-x-1"
+              />
             </Link>
-            <Link href="/register?role=organizer" className="w-full sm:w-auto px-8 py-4 rounded-full bg-card border border-border text-foreground font-bold text-lg hover:bg-secondary transition-all">
+            <Link
+              href="/register?role=organizer"
+              className="w-full rounded-full border border-border bg-background px-7 py-3.5 text-base font-semibold text-foreground transition-colors hover:bg-secondary sm:w-auto"
+            >
               I need Talent
             </Link>
           </motion.div>
@@ -92,13 +138,18 @@ export default function Home() {
       </section>
 
       {/* Features Grid */}
-      <section className="py-24 px-6 bg-secondary/30 border-t border-border/40 relative">
+      <section className="relative py-16">
         <div className="mx-auto max-w-7xl">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-4">Everything you need to gig.</h2>
-            <p className="text-muted-foreground font-medium max-w-xl mx-auto">We handle the boring logistics so you can focus entirely on the performance.</p>
+          <div className="mb-12 text-center">
+            <h2 className="mb-3 text-3xl font-black tracking-tight md:text-4xl">
+              Everything you need to gig
+            </h2>
+            <p className="mx-auto max-w-xl font-medium text-muted-foreground">
+              Simple workflows for discovering, applying, and managing
+              opportunities.
+            </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((feature, idx) => (
               <motion.div
@@ -107,13 +158,17 @@ export default function Home() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.5, delay: idx * 0.1 }}
-                className="p-8 rounded-[2rem] bg-card border border-border/60 hover:border-primary/30 transition-colors group"
+                className="group rounded-3xl border border-border/60 bg-card p-7 transition-colors hover:border-primary/40"
               >
-                <div className="h-14 w-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
+                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary transition-all duration-300 group-hover:bg-primary group-hover:text-primary-foreground">
                   <feature.icon size={24} />
                 </div>
-                <h3 className="text-xl font-bold text-foreground mb-3">{feature.title}</h3>
-                <p className="text-muted-foreground font-medium text-sm leading-relaxed">{feature.desc}</p>
+                <h3 className="mb-2 text-xl font-bold text-foreground">
+                  {feature.title}
+                </h3>
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  {feature.desc}
+                </p>
               </motion.div>
             ))}
           </div>
@@ -121,21 +176,31 @@ export default function Home() {
       </section>
 
       {/* Footer CTA */}
-      <section className="py-24 px-6">
-        <div className="mx-auto max-w-4xl rounded-[3rem] bg-gradient-to-br from-primary/20 via-primary/5 to-transparent border border-primary/20 p-12 text-center relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-          
-          <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-6 relative z-10">Ready to hit the stage?</h2>
-          <p className="text-muted-foreground font-medium mb-10 relative z-10">Join thousands of musicians already booking daily.</p>
-          
-          <Link href="/register" className="inline-flex px-8 py-4 rounded-full bg-foreground text-background font-black tracking-widest uppercase hover:scale-105 active:scale-95 transition-all shadow-xl shadow-foreground/10 relative z-10">
+      <section className="pb-10 pt-8">
+        <div className="relative mx-auto max-w-4xl overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/20 via-primary/5 to-transparent p-10 text-center md:p-12">
+          <div className="absolute right-0 top-0 h-64 w-64 translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/20 blur-3xl" />
+
+          <h2 className="relative z-10 mb-4 text-3xl font-black tracking-tight md:text-4xl">
+            Ready to hit the stage?
+          </h2>
+          <p className="relative z-10 mb-8 font-medium text-muted-foreground">
+            Join thousands of musicians and organizers already booking through
+            Get-a-Gig.
+          </p>
+
+          <Link
+            href="/register"
+            className="relative z-10 inline-flex rounded-full bg-foreground px-8 py-3.5 text-sm font-bold uppercase tracking-wider text-background transition-transform hover:scale-105 active:scale-95"
+          >
             Create Free Account
           </Link>
         </div>
       </section>
 
-      <footer className="py-8 text-center border-t border-border/40">
-        <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">© {new Date().getFullYear()} Get-a-Gig. All rights reserved.</p>
+      <footer className="border-t border-border/40 py-8 text-center">
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground md:text-sm">
+          © {new Date().getFullYear()} Get-a-Gig. All rights reserved.
+        </p>
       </footer>
     </div>
   );
