@@ -57,7 +57,7 @@ export default function SignupForm() {
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.5 }}
-      className="w-full max-w-md rounded-2xl p-8 glass-morphism shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)]"
+      className="w-full max-w-md rounded-2xl border border-border/70 bg-card/85 p-8 shadow-[0_25px_60px_-25px_rgba(0,0,0,0.8)] backdrop-blur"
     >
       <h1 className="text-3xl font-bold text-center mb-10 tracking-tight">
         Create account
@@ -74,7 +74,7 @@ export default function SignupForm() {
       )}
 
       {/* Role Chips */}
-      <div className="flex gap-3 mb-8 p-1 bg-foreground/5 rounded-xl">
+      <div className="mb-8 flex gap-3 rounded-xl border border-border bg-background p-1">
         {["musician", "organizer"].map((role) => (
           <button
             key={role}
@@ -110,23 +110,23 @@ export default function SignupForm() {
             value={form.username}
             onChange={(e) => setForm({ ...form, username: e.target.value })}
             className="w-full rounded-xl px-4 py-3
-              bg-foreground/5 border border-foreground/10
-              focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/20
+              bg-background border border-border
+              focus:outline-none focus:ring-2 focus:ring-ring/25 focus:border-ring/40
               placeholder:text-foreground/30 transition-all"
           />
         </div>
 
         <div className="space-y-1.5">
           <label className="text-xs font-semibold uppercase tracking-wider text-[var(--foreground)/50] ml-1">
-            Email 
+            Email
           </label>
           <input
             type="email"
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
             className="w-full rounded-xl px-4 py-3
-              bg-foreground/5 border border-foreground/10
-              focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/20
+              bg-background border border-border
+              focus:outline-none focus:ring-2 focus:ring-ring/25 focus:border-ring/40
               placeholder:text-foreground/30 transition-all"
           />
         </div>
@@ -143,8 +143,8 @@ export default function SignupForm() {
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
                 className="w-full rounded-xl px-4 py-3
-                  bg-foreground/5 border border-foreground/10
-                  focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/20
+                  bg-background border border-border
+                  focus:outline-none focus:ring-2 focus:ring-ring/25 focus:border-ring/40
                   placeholder:text-foreground/30 transition-all"
               />
               <button
@@ -170,8 +170,8 @@ export default function SignupForm() {
                   setForm({ ...form, confirmPassword: e.target.value })
                 }
                 className="w-full rounded-xl px-4 py-3
-                  bg-foreground/5 border border-foreground/10
-                  focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/20
+                  bg-background border border-border
+                  focus:outline-none focus:ring-2 focus:ring-ring/25 focus:border-ring/40
                   placeholder:text-foreground/30 transition-all"
               />
               <button
@@ -192,7 +192,7 @@ export default function SignupForm() {
           disabled={loading}
           className="w-full py-4 rounded-xl font-bold uppercase tracking-widest text-sm mt-4
             bg-primary text-primary-foreground
-            hover:opacity-90 transition-all shadow-lg disabled:opacity-50"
+            hover:opacity-90 transition-all shadow-[0_10px_30px_-12px_rgba(255,255,255,0.35)] disabled:opacity-50"
         >
           {loading ? "Creating account..." : "Sign up"}
         </motion.button>
