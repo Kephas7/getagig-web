@@ -10,19 +10,19 @@ export default async function EditUserPage({
 }) {
   const { id } = await params;
   const token = await getAuthToken();
-  
+
   try {
     const userData = await getUserById(id, token || undefined);
-    
+
     // Backend returns: { success: true, data: user }
     const user = userData?.data || userData;
-    
+
     if (!user) {
       notFound();
     }
 
     return (
-      <div className="p-6">
+      <div>
         <UserForm initialData={user} token={token || undefined} />
       </div>
     );
