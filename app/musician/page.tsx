@@ -94,6 +94,7 @@ export default function MusicianDashboard() {
   const pathname = usePathname();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<any>(null);
+  const [profileMissing, setProfileMissing] = useState(false);
   const [calendarMonth, setCalendarMonth] = useState(() => {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1);
@@ -125,11 +126,34 @@ export default function MusicianDashboard() {
       try {
         const token = await getAuthToken();
         if (!token) return;
+
+        setProfileMissing(false);
+
+        const calendarPromise = getMusicianCalendarEvents(token).catch(
+          (error: any) => {
+            if (error?.response?.status === 404) {
+              setProfileMissing(true);
+              return { success: true, data: [] };
+            }
+            throw error;
+          },
+        );
+
+        const applicationsPromise = getMusicianApplications(token).catch(
+          (error: any) => {
+            if (error?.response?.status === 404) {
+              setProfileMissing(true);
+              return { success: true, data: [] };
+            }
+            throw error;
+          },
+        );
+
         const [dashboardResponse, calendarResponse, applicationsResponse] =
           await Promise.all([
             getMusicianDashboard(token),
-            getMusicianCalendarEvents(token),
-            getMusicianApplications(token),
+            calendarPromise,
+            applicationsPromise,
           ]);
 
         if (dashboardResponse.success) {
@@ -188,7 +212,12 @@ export default function MusicianDashboard() {
 
           setApprovedGigEvents(approvedEvents);
         }
-      } catch (error) {
+      } catch (error: any) {
+        if (error?.response?.status === 401) {
+          await logout();
+          return;
+        }
+
         console.error("Failed to fetch dashboard data:", error);
       } finally {
         setLoading(false);
@@ -735,13 +764,23 @@ export default function MusicianDashboard() {
                       </span>
                     </div>
                   </div>
-                  <Link
-                    href="/musician/gigs"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-colors shadow-sm shrink-0"
-                  >
-                    <Search size={16} />
-                    Find Gigs
-                  </Link>
+                  {profileMissing ? (
+                    <Link
+                      href="/musician/profile/edit"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-warning/30 bg-warning/10 text-warning text-sm font-semibold hover:bg-warning/15 transition-colors shrink-0"
+                    >
+                      <User size={16} />
+                      Complete Profile
+                    </Link>
+                  ) : (
+                    <Link
+                      href="/musician/gigs"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-colors shadow-sm shrink-0"
+                    >
+                      <Search size={16} />
+                      Find Gigs
+                    </Link>
+                  )}
                 </div>
               </motion.section>
 

@@ -7,8 +7,12 @@ export const register = async (registerData: RegisterData) => {
     const response = await axios.post(API.AUTH.REGISTER, registerData);
     return response.data;
   } catch (error: Error | any) {
+    const fieldError = error.response?.data?.errors?.[0]?.message;
     throw new Error(
-      error.response?.data?.message || error.message || "Registration failed",
+      fieldError ||
+        error.response?.data?.message ||
+        error.message ||
+        "Registration failed",
     );
   }
 };

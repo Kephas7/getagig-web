@@ -1,36 +1,63 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GetaGig Web
 
-## Getting Started
+Next.js frontend for the GetaGig platform. This app is the main web client for musicians, organizers, and admins to manage profiles, gigs, applications, messaging, and notifications.
 
-First, run the development server:
+## Key Capabilities
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Authentication flows (signup, login, password reset)
+- Musician and organizer dashboard experiences
+- Gig browsing and management
+- Application workflows
+- Media upload and profile management
+- Real-time messaging and notification UX
+
+## Tech Stack
+
+- Next.js 16 (App Router)
+- React 19
+- TypeScript
+- Tailwind CSS 4
+- Axios for API integration
+- Socket.IO client for real-time features
+- React Hook Form + Zod for form handling and validation
+
+## Prerequisites
+
+- Node.js 18+
+- npm
+- Running `getagig-backend` API
+
+## Environment Variables
+
+Create `.env.local` in `getagig-web/`:
+
+```env
+NEXT_PUBLIC_API_BASE_URL=http://localhost:5050
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+If not set, the app defaults to `http://localhost:5050` in several API helpers.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Install And Run
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm install
+npm run dev
+```
 
-## Learn More
+Open `http://localhost:3000` in your browser.
 
-To learn more about Next.js, take a look at the following resources:
+## Scripts
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `npm run dev`: Start the Next.js development server
+- `npm run build`: Create a production build
+- `npm run start`: Run the production server
+- `npm run lint`: Run ESLint checks
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project Structure (High Level)
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `app/(auth)`: Authentication pages and related components
+- `app/musician`: Musician-facing pages
+- `app/organizer`: Organizer-facing pages
+- `app/admin`: Admin-facing pages
+- `app/messages`, `app/notifications`: Communication features
+- `lib/api`: API clients and endpoint wrappers

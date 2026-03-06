@@ -4,10 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signupSchema, RegisterData } from "../schema";
 import { register } from "@/lib/api/auth";
-import { setAuthToken, setUserData } from "@/lib/cookies";
 import { Eye, EyeOff } from "lucide-react";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { toast } from "@/lib/toast";
 
 export default function SignupForm() {
@@ -37,14 +36,10 @@ export default function SignupForm() {
 
     setLoading(true);
     try {
-      const { confirmPassword, ...payload } = form;
-      const res = await register(payload as any);
+      await register(form);
 
-      setAuthToken(res.data.token);
-      setUserData(res.data.user);
-
-      toast.success("Account created successfully!");
-      router.push(`/${res.data.user.role}`);
+      toast.success("Account created successfully! Please log in.");
+      router.push("/login");
     } catch (err: any) {
       setError(err.response?.data?.message || err.message || "Signup failed");
     } finally {

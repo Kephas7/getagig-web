@@ -86,9 +86,10 @@ function StatusBadge({ status }: { status: string }) {
 
 export default function OrganizerDashboard() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<any>(null);
+  const [profileMissing, setProfileMissing] = useState(false);
   const [events, setEvents] = useState<OrganizerEvent[]>([]);
   const [allApplicants, setAllApplicants] = useState<ApplicantItem[]>([]);
   const [messagingApplicantId, setMessagingApplicantId] = useState<
@@ -110,18 +111,36 @@ export default function OrganizerDashboard() {
         const token = await getAuthToken();
         if (!token) return;
 
-        const [dashboardResponse, profileResponse] = await Promise.all([
-          getOrganizerDashboard(token),
-          getOrganizerProfile(token),
-        ]);
+        const dashboardResponse = await getOrganizerDashboard(token);
+        let profileResponse: any = null;
+
+        try {
+          profileResponse = await getOrganizerProfile(token);
+        } catch (error: any) {
+          if (error?.response?.status === 404) {
+            // Profile is optional for initial dashboard load; show CTA instead.
+            setProfileMissing(true);
+          } else {
+            throw error;
+          }
+        }
 
         if (dashboardResponse?.success) {
           setData(dashboardResponse.data);
         }
 
         if (profileResponse?.success) {
+          setProfileMissing(false);
           setCanPostGig(Boolean(profileResponse.data?.isVerified));
-          const organizerId = profileResponse.data.id;
+          const organizerId =
+            profileResponse.data?.id || profileResponse.data?._id;
+
+          if (!organizerId) {
+            setEvents([]);
+            setAllApplicants([]);
+            return;
+          }
+
           const gigsResponse = await getGigs({ organizerId, limit: 100 });
 
           if (gigsResponse?.success && Array.isArray(gigsResponse.data?.gigs)) {
@@ -219,8 +238,17 @@ export default function OrganizerDashboard() {
 
             setAllApplicants(flattenedApplicants);
           }
+        } else {
+          setCanPostGig(false);
+          setEvents([]);
+          setAllApplicants([]);
         }
-      } catch (error) {
+      } catch (error: any) {
+        if (error?.response?.status === 401) {
+          await logout();
+          return;
+        }
+
         console.error("Failed to fetch dashboard data:", error);
       } finally {
         setLoading(false);
@@ -455,7 +483,14 @@ export default function OrganizerDashboard() {
                 </span>
               </div>
             </div>
-            {canPostGig ? (
+            {profileMissing ? (
+              <Link
+                href="/organizer/profile/edit"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-warning/30 bg-warning/10 text-warning text-sm font-semibold hover:bg-warning/15 transition-colors shrink-0"
+              >
+                Complete Your Profile
+              </Link>
+            ) : canPostGig ? (
               <Link
                 href="/organizer/gigs/new"
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-colors shadow-sm shrink-0"

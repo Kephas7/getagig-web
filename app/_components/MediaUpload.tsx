@@ -154,6 +154,7 @@ export default function MediaUpload({
       <AnimatePresence>
         {error && (
           <motion.div
+            key="upload-error"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
@@ -166,6 +167,7 @@ export default function MediaUpload({
 
         {success && (
           <motion.div
+            key="upload-success"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
@@ -178,6 +180,7 @@ export default function MediaUpload({
 
         {previews.length > 0 && (
           <motion.div
+            key="upload-previews"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 mt-2"
