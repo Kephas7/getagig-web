@@ -52,6 +52,8 @@ Open `http://localhost:3000` in your browser.
 - `npm run build`: Create a production build
 - `npm run start`: Run the production server
 - `npm run lint`: Run ESLint checks
+- `npm test`: Run Jest test suites
+- `npm run test:watch`: Run Jest in watch mode
 
 ## Project Structure (High Level)
 
