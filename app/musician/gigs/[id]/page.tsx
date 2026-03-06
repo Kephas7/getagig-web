@@ -109,11 +109,18 @@ export default function GigDetailPage() {
       </div>
     );
 
+  const organizerAvatar =
+    (gig.organizer as any)?.profilePicture ||
+    (gig.organizer as any)?.userId?.profilePicture ||
+    (gig.organizerId as any)?.profilePicture ||
+    (gig.organizerId as any)?.userId?.profilePicture ||
+    "";
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <MusicianHeader />
 
-      <main className="mx-auto max-w-5xl px-5 lg:px-8 pt-30 pb-16">
+      <main className="mx-auto max-w-5xl px-5 lg:px-8 pt-24 md:pt-8 pb-16">
         <motion.div {...fadeUp(0)} className="mb-8">
           <button
             onClick={() => router.back()}
@@ -132,112 +139,114 @@ export default function GigDetailPage() {
           <div className="space-y-6">
             <motion.section
               {...fadeUp(0.1)}
-              className="bg-card border border-border/60 rounded-3xl p-6 md:p-8 shadow-sm"
+              className="role-hero-shell p-6 md:p-8"
             >
-              <div className="mb-6 flex items-center gap-3 rounded-xl border border-border/60 bg-background/60 p-3">
-                {gig.organizer?.profilePicture ? (
-                  <img
-                    src={resolveMediaUrl(gig.organizer.profilePicture)}
-                    alt={
-                      gig.organizer.displayName ||
-                      gig.organizer.organizationName ||
-                      gig.organizer.username ||
-                      "Organizer"
-                    }
-                    className="h-10 w-10 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold">
-                    {(
-                      gig.organizer?.displayName ||
-                      gig.organizer?.organizationName ||
-                      gig.organizer?.username ||
-                      "O"
-                    )
-                      .charAt(0)
-                      .toUpperCase()}
+              <div className="role-hero-content">
+                <div className="mb-6 flex items-center gap-3 rounded-xl border border-border/60 bg-background/60 p-3">
+                  {organizerAvatar ? (
+                    <img
+                      src={resolveMediaUrl(organizerAvatar)}
+                      alt={
+                        gig.organizer?.displayName ||
+                        gig.organizer?.organizationName ||
+                        gig.organizer?.username ||
+                        "Organizer"
+                      }
+                      className="h-10 w-10 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold">
+                      {(
+                        gig.organizer?.displayName ||
+                        gig.organizer?.organizationName ||
+                        gig.organizer?.username ||
+                        "O"
+                      )
+                        .charAt(0)
+                        .toUpperCase()}
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                      Organized by
+                    </p>
+                    <p className="text-sm font-semibold text-foreground truncate">
+                      {gig.organizer?.displayName ||
+                        gig.organizer?.organizationName ||
+                        gig.organizer?.username ||
+                        "Organizer"}
+                    </p>
                   </div>
-                )}
-                <div className="min-w-0">
-                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                    Organized by
+                  <Link
+                    href={`/organizer/profile/${gig.organizerId}`}
+                    className="ml-auto inline-flex items-center rounded-lg border border-border/60 px-3 py-1.5 text-xs font-medium text-foreground hover:border-primary/30 hover:text-primary transition-colors"
+                  >
+                    View Profile
+                  </Link>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3 mb-6">
+                  <span className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wide border border-primary/20">
+                    {gig.eventType}
+                  </span>
+                </div>
+
+                <h1 className="text-3xl md:text-4xl font-semibold tracking-tight mb-5 leading-tight">
+                  {gig.title}
+                </h1>
+
+                <div className="flex flex-wrap gap-y-4 gap-x-6 mb-8 pb-8 border-b border-border/60">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-primary/5 text-primary">
+                      <MapPin size={18} />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                        Location
+                      </p>
+                      <p className="font-medium">{gig.location}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-primary/5 text-primary">
+                      <DollarSign size={18} />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                        Pay Rate
+                      </p>
+                      <p className="font-medium">
+                        Rs. {gig.payRate}{" "}
+                        <span className="text-xs font-normal text-muted-foreground">
+                          / session
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-primary/5 text-primary">
+                      <Calendar size={18} />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                        Deadline
+                      </p>
+                      <p className="font-medium">
+                        {new Date(gig.deadline).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="prose prose-slate max-w-none">
+                  <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                    <Sparkles size={20} className="text-primary" /> Gig
+                    Description
+                  </h3>
+                  <p className="text-muted-foreground leading-7 whitespace-pre-wrap">
+                    {gig.description}
                   </p>
-                  <p className="text-sm font-semibold text-foreground truncate">
-                    {gig.organizer?.displayName ||
-                      gig.organizer?.organizationName ||
-                      gig.organizer?.username ||
-                      "Organizer"}
-                  </p>
                 </div>
-                <Link
-                  href={`/organizer/profile/${gig.organizerId}`}
-                  className="ml-auto inline-flex items-center rounded-lg border border-border/60 px-3 py-1.5 text-xs font-medium text-foreground hover:border-primary/30 hover:text-primary transition-colors"
-                >
-                  View Profile
-                </Link>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-3 mb-6">
-                <span className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wide border border-primary/20">
-                  {gig.eventType}
-                </span>
-              </div>
-
-              <h1 className="text-3xl md:text-4xl font-semibold tracking-tight mb-5 leading-tight">
-                {gig.title}
-              </h1>
-
-              <div className="flex flex-wrap gap-y-4 gap-x-6 mb-8 pb-8 border-b border-border/60">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-primary/5 text-primary">
-                    <MapPin size={18} />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                      Location
-                    </p>
-                    <p className="font-medium">{gig.location}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-primary/5 text-primary">
-                    <DollarSign size={18} />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                      Pay Rate
-                    </p>
-                    <p className="font-medium">
-                      Rs. {gig.payRate}{" "}
-                      <span className="text-xs font-normal text-muted-foreground">
-                        / session
-                      </span>
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-primary/5 text-primary">
-                    <Calendar size={18} />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                      Deadline
-                    </p>
-                    <p className="font-medium">
-                      {new Date(gig.deadline).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="prose prose-slate max-w-none">
-                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                  <Sparkles size={20} className="text-primary" /> Gig
-                  Description
-                </h3>
-                <p className="text-muted-foreground leading-7 whitespace-pre-wrap">
-                  {gig.description}
-                </p>
               </div>
             </motion.section>
 

@@ -20,6 +20,7 @@ import {
   Eye,
 } from "lucide-react";
 import { toast } from "@/lib/toast";
+import { resolveMediaUrl } from "@/lib/utils";
 
 type VerificationAction = "approve" | "deny" | "unverify";
 
@@ -96,6 +97,17 @@ export function UsersTable({
       default:
         return null;
     }
+  };
+
+  const getUserAvatar = (user: User) => {
+    const row = user as any;
+    return (
+      user.profilePicture ||
+      row?.musicianProfile?.profilePicture ||
+      row?.organizerProfile?.profilePicture ||
+      row?.profile?.profilePicture ||
+      ""
+    );
   };
 
   const handleVerifyAction = async (
@@ -286,149 +298,150 @@ export function UsersTable({
           </tr>
         </thead>
         <tbody className="divide-y divide-border/60">
-          {filteredUsers.map((user) => (
-            <tr
-              key={user.id || user._id}
-              className="hover:bg-foreground/[0.02] transition-colors"
-            >
-              <td className="px-6 py-4 whitespace-nowrap">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0 h-10 w-10">
-                    {user.profilePicture ? (
-                      <img
-                        className="h-10 w-10 rounded-full object-cover"
-                        src={
-                          user.profilePicture.startsWith("http")
-                            ? user.profilePicture
-                            : `${process.env.NEXT_PUBLIC_API_BASE_URL}${user.profilePicture}`
-                        }
-                        alt=""
-                      />
-                    ) : (
-                      <div className="h-10 w-10 rounded-full bg-foreground/10 flex items-center justify-center border border-border/50">
-                        <span className="text-foreground/65 text-sm font-medium">
-                          {user.username.slice(0, 2).toUpperCase()}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="ml-4">
-                    <div className="text-sm font-semibold text-foreground">
-                      {user.username}
-                    </div>
-                    <div className="text-sm text-foreground/60">
-                      {user.email}
-                    </div>
-                  </div>
-                </div>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <div className="flex items-center gap-2 text-sm text-foreground capitalize">
-                  {getRoleIcon(user.role)}
-                  {user.role}
-                </div>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground/60">
-                {new Date(user.createdAt).toLocaleDateString()}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                {user.role === "musician" || user.role === "organizer" ? (
-                  <span
-                    className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${
-                      user.isVerified
-                        ? "bg-success/10 text-success border border-success/20"
-                        : user.verificationRequested
-                          ? "bg-primary/10 text-primary border border-primary/20"
-                          : "bg-warning/10 text-warning border border-warning/20"
-                    }`}
-                  >
-                    {user.isVerified
-                      ? "Verified"
-                      : user.verificationRequested
-                        ? "Requested"
-                        : "Not Verified"}
-                  </span>
-                ) : (
-                  <span className="text-xs text-foreground/50">-</span>
-                )}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <div className="flex justify-end gap-3">
-                  {(user.role === "musician" || user.role === "organizer") &&
-                    user.profileId && (
-                      <Link
-                        href={
-                          user.role === "musician"
-                            ? `/musician/profile/${user.profileId}`
-                            : `/organizer/profile/${user.profileId}`
-                        }
-                        className="text-foreground/60 hover:text-foreground transition-colors"
-                        title="View profile"
-                      >
-                        <Eye size={18} />
-                      </Link>
-                    )}
+          {filteredUsers.map((user) => {
+            const avatar = getUserAvatar(user);
 
-                  {(user.role === "musician" || user.role === "organizer") && (
-                    <button
-                      onClick={() =>
-                        handleVerifyAction(
-                          user,
-                          user.isVerified ? "unverify" : "approve",
-                        )
-                      }
-                      disabled={loading === `verify-${user.id || user._id}`}
-                      className={`transition-opacity disabled:opacity-50 ${
-                        user.isVerified
-                          ? "text-warning hover:opacity-80"
-                          : "text-success hover:opacity-80"
-                      }`}
-                      title={
-                        user.isVerified
-                          ? "Mark as unverified"
-                          : user.verificationRequested
-                            ? "Approve verification request"
-                            : "User has not requested verification"
-                      }
-                    >
-                      {user.isVerified ? (
-                        <ShieldX size={18} />
+            return (
+              <tr
+                key={user.id || user._id}
+                className="hover:bg-foreground/[0.02] transition-colors"
+              >
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0 h-10 w-10">
+                      {avatar ? (
+                        <img
+                          className="h-10 w-10 rounded-full object-cover"
+                          src={resolveMediaUrl(avatar)}
+                          alt=""
+                        />
                       ) : (
-                        <BadgeCheck size={18} />
+                        <div className="h-10 w-10 rounded-full bg-foreground/10 flex items-center justify-center border border-border/50">
+                          <span className="text-foreground/65 text-sm font-medium">
+                            {user.username.slice(0, 2).toUpperCase()}
+                          </span>
+                        </div>
                       )}
-                    </button>
+                    </div>
+                    <div className="ml-4">
+                      <div className="text-sm font-semibold text-foreground">
+                        {user.username}
+                      </div>
+                      <div className="text-sm text-foreground/60">
+                        {user.email}
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="flex items-center gap-2 text-sm text-foreground capitalize">
+                    {getRoleIcon(user.role)}
+                    {user.role}
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground/60">
+                  {new Date(user.createdAt).toLocaleDateString()}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {user.role === "musician" || user.role === "organizer" ? (
+                    <span
+                      className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${
+                        user.isVerified
+                          ? "bg-success/10 text-success border border-success/20"
+                          : user.verificationRequested
+                            ? "bg-primary/10 text-primary border border-primary/20"
+                            : "bg-warning/10 text-warning border border-warning/20"
+                      }`}
+                    >
+                      {user.isVerified
+                        ? "Verified"
+                        : user.verificationRequested
+                          ? "Requested"
+                          : "Not Verified"}
+                    </span>
+                  ) : (
+                    <span className="text-xs text-foreground/50">-</span>
                   )}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <div className="flex justify-end gap-3">
+                    {(user.role === "musician" || user.role === "organizer") &&
+                      user.profileId && (
+                        <Link
+                          href={
+                            user.role === "musician"
+                              ? `/musician/profile/${user.profileId}`
+                              : `/organizer/profile/${user.profileId}`
+                          }
+                          className="text-foreground/60 hover:text-foreground transition-colors"
+                          title="View profile"
+                        >
+                          <Eye size={18} />
+                        </Link>
+                      )}
 
-                  {(user.role === "musician" || user.role === "organizer") &&
-                    user.verificationRequested &&
-                    !user.isVerified && (
+                    {(user.role === "musician" ||
+                      user.role === "organizer") && (
                       <button
-                        onClick={() => openDenyModal(user)}
+                        onClick={() =>
+                          handleVerifyAction(
+                            user,
+                            user.isVerified ? "unverify" : "approve",
+                          )
+                        }
                         disabled={loading === `verify-${user.id || user._id}`}
-                        className="text-error hover:opacity-80 transition-opacity disabled:opacity-50"
-                        title="Deny verification request"
+                        className={`transition-opacity disabled:opacity-50 ${
+                          user.isVerified
+                            ? "text-warning hover:opacity-80"
+                            : "text-success hover:opacity-80"
+                        }`}
+                        title={
+                          user.isVerified
+                            ? "Mark as unverified"
+                            : user.verificationRequested
+                              ? "Approve verification request"
+                              : "User has not requested verification"
+                        }
                       >
-                        <ShieldX size={18} />
+                        {user.isVerified ? (
+                          <ShieldX size={18} />
+                        ) : (
+                          <BadgeCheck size={18} />
+                        )}
                       </button>
                     )}
 
-                  <Link
-                    href={`/admin/users/${user.id || user._id}/edit`}
-                    className="text-primary hover:opacity-80 transition-opacity"
-                  >
-                    <Edit size={18} />
-                  </Link>
-                  <button
-                    onClick={() => handleDelete(user.id || user._id)}
-                    disabled={loading === (user.id || user._id)}
-                    className="text-error hover:opacity-80 transition-opacity disabled:opacity-50"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </div>
-              </td>
-            </tr>
-          ))}
+                    {(user.role === "musician" || user.role === "organizer") &&
+                      user.verificationRequested &&
+                      !user.isVerified && (
+                        <button
+                          onClick={() => openDenyModal(user)}
+                          disabled={loading === `verify-${user.id || user._id}`}
+                          className="text-error hover:opacity-80 transition-opacity disabled:opacity-50"
+                          title="Deny verification request"
+                        >
+                          <ShieldX size={18} />
+                        </button>
+                      )}
+
+                    <Link
+                      href={`/admin/users/${user.id || user._id}/edit`}
+                      className="text-primary hover:opacity-80 transition-opacity"
+                    >
+                      <Edit size={18} />
+                    </Link>
+                    <button
+                      onClick={() => handleDelete(user.id || user._id)}
+                      disabled={loading === (user.id || user._id)}
+                      className="text-error hover:opacity-80 transition-opacity disabled:opacity-50"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
           {filteredUsers.length === 0 && (
             <tr>
               <td

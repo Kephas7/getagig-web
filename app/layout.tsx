@@ -1,19 +1,21 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter } from "next/font/google";
+import { Geist_Mono, Plus_Jakarta_Sans, Sora } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "./context/AuthContext";
 import { SocketProvider } from "./context/SocketContext";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const inter = Inter({
-  variable: "--font-sans",
+const bodyFont = Plus_Jakarta_Sans({
+  variable: "--font-body",
   subsets: ["latin"],
+  display: "swap",
 });
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const displayFont = Sora({
+  variable: "--font-display",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
@@ -23,7 +25,31 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Get-a-Gig | Find & Post Music Gigs",
-  description: "The platform connecting musicians with gig opportunities. Browse live performances, studio sessions, and events — or post your own.",
+  description:
+    "The platform connecting musicians with gig opportunities. Browse live performances, studio sessions, and events — or post your own.",
+  icons: {
+    icon: [
+      {
+        media: "(prefers-color-scheme: light)",
+        url: "/images/logo(light).png",
+      },
+      {
+        media: "(prefers-color-scheme: dark)",
+        url: "/images/logo(dark).png",
+      },
+    ],
+    shortcut: [
+      {
+        media: "(prefers-color-scheme: light)",
+        url: "/images/logo(light).png",
+      },
+      {
+        media: "(prefers-color-scheme: dark)",
+        url: "/images/logo(dark).png",
+      },
+    ],
+    apple: "/images/logo(light).png",
+  },
 };
 export default function RootLayout({
   children,
@@ -38,14 +64,14 @@ export default function RootLayout({
             __html: `
 (function () {
   try {
-    const theme = localStorage.getItem("theme") || "system";
+    const theme = localStorage.getItem("theme");
     const root = document.documentElement;
 
-    if (theme === "system") {
+    if (theme === "light" || theme === "dark") {
+      root.setAttribute("data-theme", theme);
+    } else {
       const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
       root.setAttribute("data-theme", prefersDark ? "dark" : "light");
-    } else {
-      root.setAttribute("data-theme", theme);
     }
   } catch (e) {}
 })();
@@ -53,7 +79,9 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${inter.className} ${inter.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body
+        className={`${bodyFont.variable} ${displayFont.variable} ${geistMono.variable} antialiased`}
+      >
         <AuthProvider>
           <SocketProvider>
             {children}

@@ -125,41 +125,46 @@ export default function ChatPage() {
     <div className="flex flex-col h-screen bg-background">
       <Header />
 
-      <main className="flex-1 flex flex-col max-w-5xl mx-auto w-full pt-24 pb-4 px-4 md:px-8 overflow-hidden">
+      <main className="flex-1 flex flex-col max-w-5xl mx-auto w-full pt-24 md:pt-8 pb-4 px-4 md:px-8 overflow-hidden">
         {/* Chat Header */}
-        <div className="flex items-center justify-between p-4 mb-4 bg-card border border-border/60 rounded-[2rem] shadow-sm">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => router.push("/messages")}
-              className="p-2 hover:bg-secondary rounded-xl transition-colors"
-            >
-              <ArrowLeft size={20} />
-            </button>
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <div className="h-12 w-12 rounded-2xl bg-secondary flex items-center justify-center border-2 border-background overflow-hidden">
-                  {otherUser?.profilePicture ? (
-                    <img
-                      src={resolveMediaUrl(otherUser.profilePicture)}
-                      alt={otherUser.username}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <User size={24} className="text-muted-foreground" />
-                  )}
+        <div className="role-hero-shell mb-4 p-4">
+          <div className="role-hero-content flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => router.push("/messages")}
+                className="p-2 hover:bg-secondary rounded-xl transition-colors"
+              >
+                <ArrowLeft size={20} />
+              </button>
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <div className="h-12 w-12 rounded-2xl bg-secondary flex items-center justify-center border-2 border-background overflow-hidden">
+                    {otherUser?.profilePicture ? (
+                      <img
+                        src={resolveMediaUrl(otherUser.profilePicture)}
+                        alt={otherUser.username}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <User size={24} className="text-muted-foreground" />
+                    )}
+                  </div>
+                  <span
+                    className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-background"
+                    style={{ backgroundColor: "var(--spotlight)" }}
+                  />
                 </div>
-                <span
-                  className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-background"
-                  style={{ backgroundColor: "var(--spotlight)" }}
-                />
-              </div>
-              <div>
-                <h2 className="font-black text-foreground">
-                  {otherUser?.username || "Loading..."}
-                </h2>
-                <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest capitalize">
-                  {otherUser?.role ?? "user"}
-                </p>
+                <div>
+                  <p className="text-[10px] text-primary font-semibold uppercase tracking-wide mb-1">
+                    Conversation
+                  </p>
+                  <h2 className="font-black text-foreground">
+                    {otherUser?.username || "Loading..."}
+                  </h2>
+                  <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest capitalize">
+                    {otherUser?.role ?? "user"}
+                  </p>
+                </div>
               </div>
             </div>
           </div>

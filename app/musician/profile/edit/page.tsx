@@ -280,9 +280,9 @@ export default function EditMusicianProfile() {
         )}
       </AnimatePresence>
 
-      <main className="relative z-10 mx-auto max-w-5xl px-5 lg:px-8 pt-30">
-        <div className="mb-8 rounded-3xl border border-border/60 bg-card p-6 md:p-7 shadow-sm">
-          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5">
+      <main className="relative z-10 mx-auto max-w-5xl px-5 lg:px-8 pt-24 md:pt-8">
+        <div className="role-hero-shell mb-8 p-6 md:p-7">
+          <div className="role-hero-content flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5">
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[11px] font-semibold uppercase tracking-wide mb-3">
                 Musician Profile Studio
@@ -633,21 +633,21 @@ export default function EditMusicianProfile() {
             </div>
           </section>
           {/* ── Media Gallery ── */}
-          <section className="bg-card border border-border/60 rounded-3xl p-6 shadow-sm space-y-5">
-            <h2 className="text-xl font-bold flex items-center gap-3 text-foreground">
+          <section className="bg-card border border-border/60 rounded-2xl p-4 sm:p-5 shadow-sm space-y-4">
+            <h2 className="text-lg font-bold flex items-center gap-3 text-foreground">
               <span className="h-6 w-1 bg-primary rounded-full" />
               Media Showcase
             </h2>
 
             {/* Profile Picture */}
-            <div className="space-y-3">
+            <div className="space-y-2">
               <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
                 Profile Picture
               </h3>
-              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
+              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3">
                 <div className="shrink-0">
                   {formData.profilePicture ? (
-                    <div className="relative w-32 h-32 rounded-3xl overflow-hidden border-4 border-card shadow-lg group">
+                    <div className="relative w-24 h-24 rounded-2xl overflow-hidden border-2 border-card shadow-md group">
                       <img
                         src={resolveMediaUrl(formData.profilePicture)}
                         alt="Profile"
@@ -660,12 +660,12 @@ export default function EditMusicianProfile() {
                         }
                         className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                       >
-                        <Trash2 size={24} className="text-white" />
+                        <Trash2 size={18} className="text-white" />
                       </button>
                     </div>
                   ) : (
-                    <div className="w-32 h-32 rounded-3xl border-2 border-dashed border-border flex items-center justify-center bg-secondary/30 text-muted-foreground/30">
-                      <UserIcon size={40} />
+                    <div className="w-24 h-24 rounded-2xl border-2 border-dashed border-border flex items-center justify-center bg-secondary/30 text-muted-foreground/30">
+                      <UserIcon size={30} />
                     </div>
                   )}
                 </div>
@@ -699,7 +699,7 @@ export default function EditMusicianProfile() {
             </div>
 
             {/* Photos */}
-            <div className="space-y-3">
+            <div className="space-y-2">
               <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                 <Camera size={14} /> Gallery Photos
               </h3>
@@ -755,7 +755,7 @@ export default function EditMusicianProfile() {
             </div>
 
             {/* Videos */}
-            <div className="space-y-3">
+            <div className="space-y-2">
               <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                 <VideoIcon size={14} /> Performance Videos
               </h3>
@@ -811,7 +811,7 @@ export default function EditMusicianProfile() {
             </div>
 
             {/* Audio Samples */}
-            <div className="space-y-3">
+            <div className="space-y-2">
               <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                 <Mic2 size={14} /> Audio Samples
               </h3>

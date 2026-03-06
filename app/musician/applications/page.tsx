@@ -16,6 +16,7 @@ import {
   ArrowRight,
   Loader2,
   Music,
+  Sparkles,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -55,19 +56,30 @@ export default function MusicianApplicationsPage() {
     <div className="min-h-screen bg-background">
       <MusicianHeader />
 
-      <main className="mx-auto max-w-5xl px-6 lg:px-8 pt-30 pb-14">
-        <header className="mb-8">
-          <motion.h1
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-3xl md:text-4xl font-semibold tracking-tight text-foreground"
-          >
-            My <span className="text-primary">Applications</span>
-          </motion.h1>
-          <p className="mt-2 text-muted-foreground">
-            Track your progress and get ready for the limelight.
-          </p>
-        </header>
+      <main className="mx-auto max-w-5xl px-6 lg:px-8 pt-24 md:pt-8 pb-14">
+        <motion.section
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="role-hero-shell mb-8 p-6 md:p-8"
+        >
+          <div className="role-hero-content">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wide mb-3 border border-primary/20">
+              <Sparkles size={12} className="animate-pulse" />
+              Musician Applications
+            </div>
+            <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-foreground">
+              My <span className="gradient-text">Applications</span>
+            </h1>
+            <p className="mt-2 max-w-lg text-muted-foreground font-medium">
+              Track your progress and stay ready for upcoming performances.
+            </p>
+            <div className="mt-5 flex flex-wrap gap-2.5">
+              <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-[11px] font-semibold text-primary">
+                {applications.length} Total Applications
+              </span>
+            </div>
+          </div>
+        </motion.section>
 
         {applications.length > 0 ? (
           <div className="grid grid-cols-1 gap-6">

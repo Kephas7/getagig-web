@@ -155,24 +155,34 @@ export default function GigApplicationsPage() {
     <div className="min-h-screen bg-background pb-16">
       <OrganizerHeader />
 
-      <main className="mx-auto max-w-6xl px-5 lg:px-8 pt-32">
-        <motion.div {...fadeUp(0)} className="flex items-center gap-4 mb-6">
-          <button
-            onClick={() => router.push("/organizer/gigs")}
-            className="p-2.5 rounded-xl bg-card border border-border/60 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeft size={18} />
-          </button>
-          <div>
-            <h1 className="text-3xl font-semibold tracking-tight text-foreground">
-              Talent Applications
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Reviewing applicants for{" "}
-              <span className="font-medium text-foreground">{gig?.title}</span>
-            </p>
+      <main className="mx-auto max-w-6xl px-5 lg:px-8 pt-24 md:pt-8">
+        <motion.section
+          {...fadeUp(0)}
+          className="role-hero-shell mb-6 p-5 md:p-6"
+        >
+          <div className="role-hero-content flex items-center gap-4">
+            <button
+              onClick={() => router.push("/organizer/gigs")}
+              className="p-2.5 rounded-xl bg-card border border-border/60 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ArrowLeft size={18} />
+            </button>
+            <div>
+              <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wide mb-3 border border-primary/20">
+                Organizer Applications
+              </div>
+              <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-foreground">
+                Talent Applications
+              </h1>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Reviewing applicants for{" "}
+                <span className="font-medium text-foreground">
+                  {gig?.title}
+                </span>
+              </p>
+            </div>
           </div>
-        </motion.div>
+        </motion.section>
 
         <motion.div
           {...fadeUp(0.03)}

@@ -10,13 +10,11 @@ import {
   Activity,
   Sparkles,
   Loader2,
-  ArrowRight,
   ChevronLeft,
   ChevronRight,
   Calendar,
   MapPin,
   PlusCircle,
-  Bell,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -430,28 +428,23 @@ export default function OrganizerDashboard() {
     <div className="min-h-screen bg-background relative overflow-x-clip">
       <OrganizerHeader />
 
-      <main className="relative z-10 mx-auto max-w-7xl px-5 lg:px-8 pt-32 pb-16 space-y-7">
-        <motion.section
-          {...fadeUp(0)}
-          className="relative overflow-hidden rounded-3xl border border-border/60 bg-card/90 backdrop-blur-sm p-6 md:p-8 shadow-sm"
-        >
-          <div className="absolute inset-0 mesh-gradient opacity-30" />
-          <div className="absolute -right-16 -top-20 h-44 w-44 rounded-full bg-warning/15 blur-3xl" />
-
-          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <main className="relative z-10 mx-auto max-w-7xl px-5 lg:px-8 pt-24 md:pt-8 pb-16 space-y-7">
+        <motion.section {...fadeUp(0)} className="role-hero-shell p-6 md:p-8">
+          <div className="role-hero-content flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-warning/10 text-warning text-xs font-semibold uppercase tracking-wide mb-3 border border-warning/30">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wide mb-3 border border-primary/20">
                 <Sparkles size={12} className="animate-pulse" />
                 Organizer Dashboard
               </div>
-              <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground mt-1">
-                Welcome, <span className="gradient-text">{displayName}</span>
+              <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-foreground mt-1">
+                Welcome back,{" "}
+                <span className="gradient-text">{displayName}</span>!
               </h1>
-              <p className="mt-2 text-muted-foreground font-medium">
+              <p className="mt-2 max-w-lg text-muted-foreground font-medium">
                 Manage gigs, applications, and upcoming events in one place.
               </p>
               <div className="mt-5 flex flex-wrap gap-2.5">
-                <span className="inline-flex items-center rounded-full border border-warning/25 bg-warning/10 px-3 py-1 text-[11px] font-semibold text-warning">
+                <span className="inline-flex items-center rounded-full border border-border/70 bg-background/70 px-3 py-1 text-[11px] font-semibold text-foreground/75">
                   {applicantSummary.pending} Pending Applications
                 </span>
                 <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-[11px] font-semibold text-primary">
@@ -513,7 +506,7 @@ export default function OrganizerDashboard() {
             {...fadeUp(0.1)}
             className="xl:col-span-2 rounded-3xl border border-border/60 bg-card/90 backdrop-blur-sm p-6 shadow-sm"
           >
-            <div className="flex items-center justify-between gap-3 mb-4">
+            <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
               <div>
                 <h2 className="text-lg font-semibold flex items-center gap-2 text-foreground">
                   <Calendar size={18} className="text-primary" />
@@ -523,7 +516,7 @@ export default function OrganizerDashboard() {
                   Track your gig dates and statuses by day.
                 </p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="inline-flex items-center gap-1 rounded-xl border border-border/60 bg-background/70 p-1">
                 <button
                   type="button"
                   onClick={() =>
@@ -532,11 +525,11 @@ export default function OrganizerDashboard() {
                         new Date(prev.getFullYear(), prev.getMonth() - 1, 1),
                     )
                   }
-                  className="h-8 w-8 rounded-lg border border-border/60 flex items-center justify-center hover:bg-secondary/40"
+                  className="h-8 w-8 rounded-lg text-foreground/80 hover:bg-secondary/50 hover:text-foreground transition-colors inline-flex items-center justify-center"
                 >
-                  <ChevronLeft size={14} />
+                  <ChevronLeft size={15} />
                 </button>
-                <span className="text-sm font-semibold text-foreground min-w-[130px] text-center">
+                <span className="min-w-[138px] text-center text-sm font-semibold text-foreground px-1">
                   {monthLabel}
                 </span>
                 <button
@@ -547,46 +540,50 @@ export default function OrganizerDashboard() {
                         new Date(prev.getFullYear(), prev.getMonth() + 1, 1),
                     )
                   }
-                  className="h-8 w-8 rounded-lg border border-border/60 flex items-center justify-center hover:bg-secondary/40"
+                  className="h-8 w-8 rounded-lg text-foreground/80 hover:bg-secondary/50 hover:text-foreground transition-colors inline-flex items-center justify-center"
                 >
-                  <ChevronRight size={14} />
+                  <ChevronRight size={15} />
                 </button>
               </div>
             </div>
 
-            <div className="mb-3 text-sm font-semibold text-foreground">
-              {monthLabel}
+            <div className="mb-4 rounded-2xl border border-border/60 bg-background/50 p-3">
+              <div className="mb-3 flex flex-wrap items-center gap-3 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-primary" /> Open Gig
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-success" /> Filled
+                  Gig
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-primary/70" /> Mixed
+                  Day
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-foreground/40" />{" "}
+                  Past Date
+                </span>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-[11px] font-semibold text-primary">
+                  {thisMonthCount} This Month
+                </span>
+                <span className="inline-flex items-center rounded-full border border-border/70 bg-background/70 px-3 py-1 text-[11px] font-semibold text-foreground/75">
+                  {upcomingEvents.length} Upcoming
+                </span>
+              </div>
             </div>
 
-            <div className="mb-4 flex flex-wrap items-center gap-3 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-              <span className="inline-flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-primary" /> Open Gig
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-success" /> Filled Gig
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-primary/70" /> Mixed
-                Day
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-foreground/40" /> Past
-                Date
-              </span>
-            </div>
-
-            <div className="mb-4 flex flex-wrap gap-2">
-              <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-[11px] font-semibold text-primary">
-                {thisMonthCount} This Month
-              </span>
-              <span className="inline-flex items-center rounded-full border border-border/70 bg-background/70 px-3 py-1 text-[11px] font-semibold text-foreground/75">
-                {upcomingEvents.length} Upcoming
-              </span>
-            </div>
-
-            <div className="grid grid-cols-7 gap-2 text-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground mb-2">
+            <div className="mb-2 grid grid-cols-7 gap-2">
               {DAY_LABELS.map((label) => (
-                <div key={label}>{label}</div>
+                <div
+                  key={label}
+                  className="rounded-lg border border-border/40 bg-background/40 py-1.5 text-center text-[10px] font-semibold uppercase tracking-wide text-muted-foreground"
+                >
+                  {label}
+                </div>
               ))}
             </div>
 
@@ -596,7 +593,7 @@ export default function OrganizerDashboard() {
                   return (
                     <div
                       key={key}
-                      className="h-14 rounded-xl border border-transparent"
+                      className="h-16 rounded-xl border border-transparent"
                     />
                   );
                 }
@@ -609,9 +606,9 @@ export default function OrganizerDashboard() {
                     key={key}
                     type="button"
                     onClick={() => setSelectedDate(date)}
-                    className={`h-14 rounded-xl border text-sm font-bold relative transition-all ${
+                    className={`h-16 rounded-xl border text-sm font-semibold relative transition-all ${
                       isSelected
-                        ? "bg-primary text-primary-foreground border-primary"
+                        ? "bg-primary text-primary-foreground border-primary shadow-[0_10px_20px_-14px_rgba(0,0,0,0.45)]"
                         : dayClass ||
                           "border-border/60 bg-background/50 text-foreground hover:border-primary/30"
                     }`}
@@ -619,7 +616,7 @@ export default function OrganizerDashboard() {
                     {date.getDate()}
                     {hasEvent && (
                       <span
-                        className={`absolute bottom-1.5 left-1/2 -translate-x-1/2 h-1.5 w-1.5 rounded-full ${
+                        className={`absolute bottom-2 left-1/2 -translate-x-1/2 h-1.5 w-1.5 rounded-full ${
                           isSelected ? "bg-primary-foreground" : dotClass
                         }`}
                       />
@@ -701,62 +698,6 @@ export default function OrganizerDashboard() {
           </motion.section>
 
           <div className="space-y-6">
-            <motion.section
-              {...fadeUp(0.15)}
-              className="rounded-3xl border border-border/60 bg-card/90 backdrop-blur-sm p-6 shadow-sm"
-            >
-              <div className="mb-4 flex items-center justify-between gap-3">
-                <h2 className="text-lg font-semibold text-foreground">
-                  Quick Actions
-                </h2>
-                <span className="text-[10px] font-semibold uppercase tracking-wide px-2 py-1 rounded-full bg-background/60 text-muted-foreground border border-border/70">
-                  Organizer Tools
-                </span>
-              </div>
-              <div className="space-y-2">
-                {canPostGig ? (
-                  <Link
-                    href="/organizer/gigs/new"
-                    className="flex items-center justify-between px-3 py-2 rounded-xl border border-border/60 hover:bg-secondary/30 hover:border-primary/25"
-                  >
-                    <span className="text-sm font-medium">Post New Gig</span>
-                    <ArrowRight size={14} className="text-muted-foreground" />
-                  </Link>
-                ) : (
-                  <Link
-                    href="/organizer/profile"
-                    className="flex items-center justify-between px-3 py-2 rounded-xl border border-border/60 hover:bg-secondary/30"
-                  >
-                    <span className="text-sm font-medium">
-                      Verify to Post Gigs
-                    </span>
-                    <ArrowRight size={14} className="text-muted-foreground" />
-                  </Link>
-                )}
-                <Link
-                  href="/organizer/gigs"
-                  className="flex items-center justify-between px-3 py-2 rounded-xl border border-border/60 hover:bg-secondary/30 hover:border-primary/25"
-                >
-                  <span className="text-sm font-medium">Manage Gigs</span>
-                  <ArrowRight size={14} className="text-muted-foreground" />
-                </Link>
-                <Link
-                  href="/organizer/profile"
-                  className="flex items-center justify-between px-3 py-2 rounded-xl border border-border/60 hover:bg-secondary/30 hover:border-primary/25"
-                >
-                  <span className="text-sm font-medium">View Profile</span>
-                  <ArrowRight size={14} className="text-muted-foreground" />
-                </Link>
-                <Link
-                  href="/notifications"
-                  className="flex items-center justify-between px-3 py-2 rounded-xl border border-border/60 hover:bg-secondary/30 hover:border-primary/25"
-                >
-                  <span className="text-sm font-medium">Notifications</span>
-                  <Bell size={14} className="text-muted-foreground" />
-                </Link>
-              </div>
-            </motion.section>
-
             <motion.section
               {...fadeUp(0.2)}
               className="rounded-3xl border border-border/60 bg-card/90 backdrop-blur-sm p-6 shadow-sm"

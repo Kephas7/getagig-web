@@ -138,27 +138,30 @@ export default function NewGigPage() {
     return (
       <div className="min-h-screen bg-background pb-20">
         <OrganizerHeader />
-        <main className="mx-auto max-w-4xl px-5 lg:px-8 pt-32">
-          <div className="rounded-3xl border border-warning/25 bg-warning/10 p-8 md:p-10">
-            <h1 className="text-2xl md:text-3xl font-semibold text-foreground">
-              Verification required
-            </h1>
-            <p className="mt-3 text-muted-foreground">
-              Your organizer profile must be verified before you can post gigs.
-            </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link
-                href="/organizer/profile"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-colors"
-              >
-                Go to Profile
-              </Link>
-              <Link
-                href="/organizer/gigs"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-border/60 text-sm font-semibold hover:bg-secondary/30 transition-colors"
-              >
-                Back to My Gigs
-              </Link>
+        <main className="mx-auto max-w-4xl px-5 lg:px-8 pt-24 md:pt-8">
+          <div className="role-hero-shell border-warning/25 bg-warning/10 p-8 md:p-10">
+            <div className="role-hero-content">
+              <h1 className="text-2xl md:text-3xl font-semibold text-foreground">
+                Verification required
+              </h1>
+              <p className="mt-3 text-muted-foreground">
+                Your organizer profile must be verified before you can post
+                gigs.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link
+                  href="/organizer/profile"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-colors"
+                >
+                  Go to Profile
+                </Link>
+                <Link
+                  href="/organizer/gigs"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-border/60 text-sm font-semibold hover:bg-secondary/30 transition-colors"
+                >
+                  Back to My Gigs
+                </Link>
+              </div>
             </div>
           </div>
         </main>
@@ -170,19 +173,26 @@ export default function NewGigPage() {
     <div className="min-h-screen bg-background pb-20">
       <OrganizerHeader />
 
-      <main className="mx-auto max-w-4xl px-5 lg:px-8 pt-32">
-        <div className="flex items-center gap-4 mb-10">
-          <button
-            onClick={() => router.back()}
-            className="p-3 rounded-2xl bg-card border border-border/60 text-muted-foreground hover:text-foreground transition-all shadow-sm"
-          >
-            <ArrowLeft size={20} />
-          </button>
-          <div>
-            <h1 className="text-4xl font-bold tracking-tight">Create Gig</h1>
-            <p className="mt-1 text-muted-foreground">
-              Add your gig details and publish when ready.
-            </p>
+      <main className="mx-auto max-w-4xl px-5 lg:px-8 pt-24 md:pt-8">
+        <div className="role-hero-shell mb-10 p-5 md:p-6">
+          <div className="role-hero-content flex items-center gap-4">
+            <button
+              onClick={() => router.back()}
+              className="p-3 rounded-2xl bg-card border border-border/60 text-muted-foreground hover:text-foreground transition-all shadow-sm"
+            >
+              <ArrowLeft size={20} />
+            </button>
+            <div>
+              <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wide mb-3 border border-primary/20">
+                Organizer Gigs
+              </div>
+              <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-foreground">
+                Create Gig
+              </h1>
+              <p className="mt-1 text-muted-foreground">
+                Add your gig details and publish when ready.
+              </p>
+            </div>
           </div>
         </div>
 

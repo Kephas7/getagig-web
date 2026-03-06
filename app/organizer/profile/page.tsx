@@ -208,15 +208,10 @@ export default function OrganizerProfilePage() {
     <div className="min-h-screen bg-background relative overflow-x-clip">
       <OrganizerHeader />
 
-      <main className="relative z-10 mx-auto max-w-6xl px-5 lg:px-8 pt-28 pb-20">
+      <main className="relative z-10 mx-auto max-w-6xl px-5 lg:px-8 pt-24 md:pt-8 pb-20">
         {/* ── Hero Card ── */}
-        <motion.div
-          {...fadeUp(0)}
-          className="relative rounded-3xl overflow-hidden mb-8 border border-border/70 shadow-sm bg-card"
-        >
-          <div className="absolute inset-0 bg-gradient-to-br from-warning/12 via-transparent to-primary/8 pointer-events-none" />
-
-          <div className="px-6 md:px-8 py-6 md:py-7">
+        <motion.div {...fadeUp(0)} className="role-hero-shell mb-8">
+          <div className="role-hero-content px-6 md:px-8 py-6 md:py-7">
             <div className="grid grid-cols-1 xl:grid-cols-[auto_1fr] gap-6 xl:gap-8 items-start">
               <div className="space-y-3">
                 <div
@@ -230,8 +225,8 @@ export default function OrganizerProfilePage() {
                       className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                   ) : (
-                    <div className="h-full w-full flex items-center justify-center bg-warning/10">
-                      <Building2 size={56} className="text-warning/60" />
+                    <div className="h-full w-full flex items-center justify-center bg-primary/10">
+                      <Building2 size={56} className="text-primary/50" />
                     </div>
                   )}
 
@@ -257,7 +252,7 @@ export default function OrganizerProfilePage() {
                   />
                 </div>
 
-                <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-warning/10 border border-warning/20 text-sm font-semibold text-warning">
+                <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-primary/10 border border-primary/20 text-sm font-semibold text-primary">
                   <Building2 size={16} strokeWidth={2.5} />
                   {mediaCount} Gallery Items
                 </div>
@@ -266,24 +261,22 @@ export default function OrganizerProfilePage() {
               <div className="min-w-0 space-y-5">
                 <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-5">
                   <div className="min-w-0">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-warning/10 text-warning text-xs font-semibold uppercase tracking-wide mb-3 border border-warning/25">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wide mb-3 border border-primary/20">
                       <Sparkles size={12} className="animate-pulse" />
                       Organizer Profile
                     </div>
                     <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-foreground truncate">
-                      <span className="gradient-text">
-                        {profile?.organizationName}
-                      </span>
+                      {profile?.organizationName}
                     </h1>
                     <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground mt-3 font-medium">
                       {profile?.location && (
                         <span className="flex items-center gap-1.5">
-                          <MapPin size={15} className="text-warning" />
+                          <MapPin size={15} className="text-primary" />
                           {profile.location}
                         </span>
                       )}
                       {profile?.organizationType && (
-                        <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-warning/10 border border-warning/20 text-warning text-xs font-semibold uppercase tracking-wide">
+                        <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold uppercase tracking-wide">
                           <Building2 size={12} />
                           {profile.organizationType}
                         </span>
@@ -298,7 +291,7 @@ export default function OrganizerProfilePage() {
                           type="button"
                           onClick={handleRequestVerification}
                           disabled={requestingVerification}
-                          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-warning/30 text-warning text-xs font-semibold uppercase tracking-wide hover:bg-warning/10 transition-colors disabled:opacity-50"
+                          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-primary/30 text-primary text-xs font-semibold uppercase tracking-wide hover:bg-primary/10 transition-colors disabled:opacity-50"
                         >
                           {requestingVerification
                             ? "Requesting..."
@@ -307,7 +300,7 @@ export default function OrganizerProfilePage() {
                       )}
                     <Link
                       href="/organizer/profile/edit"
-                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold transition-colors hover:opacity-90"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-foreground text-background text-sm font-semibold transition-colors hover:opacity-90"
                     >
                       <Edit size={16} />
                       Edit Profile

@@ -2,8 +2,9 @@
 
 import { useAuth } from "@/app/context/AuthContext";
 import { useSocket } from "@/app/context/SocketContext";
-import { LogOut, Bell, Sparkles } from "lucide-react";
+import { LogOut, Bell } from "lucide-react";
 import Link from "next/link";
+import ThemeLogo from "@/app/_components/ThemeLogo";
 
 export default function AdminHeader() {
   const { logout, user } = useAuth();
@@ -12,8 +13,12 @@ export default function AdminHeader() {
   return (
     <header className="h-16 border-b border-border/60 bg-background/75 backdrop-blur-xl sticky top-0 z-10 px-4 sm:px-6 flex items-center justify-between">
       <div className="flex items-center gap-3 min-w-0">
-        <div className="h-8 w-8 rounded-lg bg-primary/10 border border-primary/20 text-primary flex items-center justify-center">
-          <Sparkles size={15} />
+        <div className="h-[2.8rem] w-[6.4rem] sm:w-[7.2rem] flex items-center justify-center overflow-hidden">
+          <ThemeLogo
+            width={320}
+            height={120}
+            className="h-full w-full object-contain object-center"
+          />
         </div>
         <div className="min-w-0">
           <p className="text-xs uppercase tracking-wide text-foreground/50">

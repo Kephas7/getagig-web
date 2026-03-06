@@ -96,21 +96,26 @@ export default function EditGigPage() {
     <div className="min-h-screen bg-background pb-20">
       <OrganizerHeader />
 
-      <main className="mx-auto max-w-4xl px-5 lg:px-8 pt-32">
-        <div className="flex items-center gap-4 mb-10">
-          <button
-            onClick={() => router.back()}
-            className="p-3 rounded-2xl bg-card border border-border/60 text-muted-foreground hover:text-foreground transition-all shadow-sm"
-          >
-            <ArrowLeft size={20} />
-          </button>
-          <div>
-            <h1 className="text-4xl font-bold tracking-tight text-foreground">
-              Edit <span className="text-primary">Gig</span>
-            </h1>
-            <p className="mt-1 text-muted-foreground">
-              Update the details and save your changes.
-            </p>
+      <main className="mx-auto max-w-4xl px-5 lg:px-8 pt-24 md:pt-8">
+        <div className="role-hero-shell mb-10 p-5 md:p-6">
+          <div className="role-hero-content flex items-center gap-4">
+            <button
+              onClick={() => router.back()}
+              className="p-3 rounded-2xl bg-card border border-border/60 text-muted-foreground hover:text-foreground transition-all shadow-sm"
+            >
+              <ArrowLeft size={20} />
+            </button>
+            <div>
+              <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wide mb-3 border border-primary/20">
+                Organizer Gigs
+              </div>
+              <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-foreground">
+                Edit Gig
+              </h1>
+              <p className="mt-1 text-muted-foreground">
+                Update the details and save your changes.
+              </p>
+            </div>
           </div>
         </div>
 

@@ -182,7 +182,7 @@ export default function PublicOrganizerProfilePage() {
         <MusicianHeader />
       ) : null}
 
-      <main className="mx-auto max-w-7xl px-5 lg:px-8 pt-28 pb-20">
+      <main className="mx-auto max-w-7xl px-5 lg:px-8 pt-24 md:pt-8 pb-20">
         <div className="mb-6 flex items-center justify-between gap-3">
           <button
             type="button"
@@ -207,18 +207,12 @@ export default function PublicOrganizerProfilePage() {
         </div>
 
         {/* ── Hero Card ── */}
-        <motion.div
-          {...fadeUp(0)}
-          className="relative rounded-3xl overflow-hidden mb-10 border border-border/60 shadow-lg"
-        >
-          {/* Cover */}
-          <div className="h-40 bg-primary/10 border-b border-border/60" />
-
+        <motion.div {...fadeUp(0)} className="role-hero-shell mb-10">
           {/* Profile Row */}
-          <div className="bg-card px-6 md:px-10 pt-0 pb-8">
-            <div className="flex flex-col md:flex-row md:items-end gap-5 -mt-16 mb-6">
+          <div className="role-hero-content px-6 md:px-10 py-6 md:py-7">
+            <div className="flex flex-col md:flex-row md:items-end gap-5 mb-6">
               {/* Avatar */}
-              <div className="group relative h-32 w-32 rounded-3xl border-4 border-card bg-muted overflow-hidden shadow-xl shrink-0 flex items-center justify-center text-primary">
+              <div className="group relative h-32 w-32 md:h-36 md:w-36 rounded-2xl border border-border/60 bg-muted overflow-hidden shrink-0 flex items-center justify-center text-primary">
                 {profile?.profilePicture ? (
                   <img
                     src={resolveMediaUrl(profile.profilePicture)}
@@ -236,7 +230,10 @@ export default function PublicOrganizerProfilePage() {
               <div className="flex-1 min-w-0">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div>
-                    <h1 className="text-3xl font-extrabold tracking-tight text-foreground truncate">
+                    <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wide mb-3 border border-primary/20">
+                      Organizer Profile
+                    </div>
+                    <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-foreground truncate">
                       {profile?.organizationName}
                     </h1>
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-muted-foreground mt-2">

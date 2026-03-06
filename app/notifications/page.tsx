@@ -195,7 +195,7 @@ export default function NotificationsPage() {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="mx-auto max-w-3xl px-6 lg:px-8 pt-32 pb-16">
+      <main className="mx-auto max-w-3xl px-6 lg:px-8 pt-24 md:pt-8 pb-16">
         <div className="flex items-center justify-between mb-10">
           <div>
             <motion.h1

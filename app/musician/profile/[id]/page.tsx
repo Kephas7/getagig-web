@@ -156,7 +156,7 @@ export default function PublicMusicianProfilePage() {
         <MusicianHeader />
       ) : null}
 
-      <main className="mx-auto max-w-6xl px-5 lg:px-8 pt-28 pb-16">
+      <main className="mx-auto max-w-6xl px-5 lg:px-8 pt-24 md:pt-8 pb-16">
         <div className="mb-6 flex items-center justify-between gap-3">
           <button
             type="button"
@@ -181,14 +181,9 @@ export default function PublicMusicianProfilePage() {
         </div>
 
         {/* ── Hero Card ── */}
-        <motion.div
-          {...fadeUp(0)}
-          className="relative rounded-3xl overflow-hidden mb-8 border border-border/70 shadow-sm bg-card"
-        >
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-transparent to-emerald-500/10 pointer-events-none" />
-
+        <motion.div {...fadeUp(0)} className="role-hero-shell mb-8">
           {/* Profile Row */}
-          <div className="px-6 md:px-8 py-6 md:py-7">
+          <div className="role-hero-content px-6 md:px-8 py-6 md:py-7">
             <div className="flex flex-col md:flex-row md:items-end gap-5 mb-6 relative z-10">
               {/* Avatar */}
               <div className="group relative h-32 w-32 md:h-36 md:w-36 rounded-2xl border border-border/60 bg-muted overflow-hidden shrink-0">

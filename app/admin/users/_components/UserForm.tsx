@@ -14,6 +14,7 @@ import { useState } from "react";
 import { toast } from "@/lib/toast";
 import { createUser, updateUser } from "@/lib/api/admin/user";
 import { Camera } from "lucide-react";
+import { resolveMediaUrl } from "@/lib/utils";
 
 interface UserFormProps {
   initialData?: User;
@@ -26,9 +27,7 @@ export function UserForm({ initialData, token }: UserFormProps) {
   const [mutationError, setMutationError] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(
     initialData?.profilePicture
-      ? initialData.profilePicture.startsWith("http")
-        ? initialData.profilePicture
-        : `${process.env.NEXT_PUBLIC_API_BASE_URL}${initialData.profilePicture}`
+      ? resolveMediaUrl(initialData.profilePicture)
       : null,
   );
 

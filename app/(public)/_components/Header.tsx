@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Music, Home, Search, User, LogOut, Menu, X, Info } from "lucide-react";
+import { Home, Search, User, LogOut, Menu, X, Info } from "lucide-react";
 import ThemeToggle from "@/app/_components/ThemeToggle";
+import ThemeLogo from "@/app/_components/ThemeLogo";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/app/context/AuthContext";
 
@@ -59,15 +60,24 @@ export default function Navbar() {
         <div className="flex items-center justify-between gap-4">
           <Link
             href="/"
-            className="flex items-center gap-2.5 group shrink-0"
+            className="flex items-center group shrink-0"
             onClick={() => setMobileMenuOpen(false)}
           >
-            <div className="h-8 w-8 rounded-xl bg-primary flex items-center justify-center shadow-sm group-hover:shadow-primary/30 group-hover:scale-105 transition-all">
-              <Music className="h-4 w-4 text-primary-foreground" />
+            <div
+              className={`${
+                scrolled
+                  ? "h-[4.2rem] w-[12.1rem] sm:w-[13.4rem] md:w-[14.8rem]"
+                  : "h-[4.9rem] w-[13.6rem] sm:w-[15.2rem] md:w-[16.8rem]"
+              } flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105`}
+            >
+              <ThemeLogo
+                width={760}
+                height={320}
+                className={`h-full w-full object-contain object-center origin-center transition-transform ${
+                  scrolled ? "scale-[1.45]" : "scale-[1.7]"
+                }`}
+              />
             </div>
-            <span className="text-base font-bold tracking-tight">
-              Get-A-Gig
-            </span>
           </Link>
 
           <div className="hidden md:flex items-center gap-1">

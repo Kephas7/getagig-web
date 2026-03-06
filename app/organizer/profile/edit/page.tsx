@@ -291,16 +291,21 @@ export default function EditOrganizerProfile() {
         )}
       </AnimatePresence>
 
-      <main className="mx-auto max-w-4xl px-5 lg:px-8 pt-28">
-        <div className="mb-10">
-          <h1 className="text-4xl font-extrabold tracking-tight text-foreground">
-            {hasProfile ? "The Organizer's Hub" : "Launch Your Venue"}
-          </h1>
-          <p className="mt-3 text-lg text-foreground/60">
-            {hasProfile
-              ? "Manage your organization and connect with world-class talent."
-              : "Setup your profile to start hosting unforgettable events."}
-          </p>
+      <main className="mx-auto max-w-4xl px-5 lg:px-8 pt-24 md:pt-8">
+        <div className="role-hero-shell mb-10 p-6 md:p-8">
+          <div className="role-hero-content">
+            <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wide mb-3 border border-primary/20">
+              Organizer Profile Studio
+            </div>
+            <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-foreground">
+              {hasProfile ? "The Organizer's Hub" : "Launch Your Venue"}
+            </h1>
+            <p className="mt-3 text-base md:text-lg text-muted-foreground max-w-2xl">
+              {hasProfile
+                ? "Manage your organization and connect with world-class talent."
+                : "Setup your profile to start hosting unforgettable events."}
+            </p>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-7" noValidate>
@@ -582,21 +587,21 @@ export default function EditOrganizerProfile() {
           </section>
 
           {/* ── Media ── */}
-          <section className="bg-card border border-border/60 rounded-[2rem] p-8 md:p-10 shadow-xl space-y-8">
-            <h2 className="text-xl font-bold flex items-center gap-3 text-foreground">
+          <section className="bg-card border border-border/60 rounded-2xl p-5 md:p-6 shadow-sm space-y-5">
+            <h2 className="text-lg font-bold flex items-center gap-3 text-foreground">
               <span className="h-6 w-1 bg-primary rounded-full" />
               Atmosphere (Media)
             </h2>
 
             {/* Profile Picture */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
                 Profile Picture
               </h3>
-              <div className="flex items-start gap-5">
+              <div className="flex items-start gap-3">
                 <div className="shrink-0">
                   {formData.profilePicture ? (
-                    <div className="relative w-28 h-28 rounded-2xl overflow-hidden border-2 border-border group">
+                    <div className="relative w-24 h-24 rounded-xl overflow-hidden border-2 border-border group">
                       <img
                         src={resolveMediaUrl(formData.profilePicture)}
                         alt="Profile"
@@ -613,9 +618,9 @@ export default function EditOrganizerProfile() {
                       </button>
                     </div>
                   ) : (
-                    <div className="w-28 h-28 rounded-2xl border-2 border-dashed border-border flex items-center justify-center bg-muted/30">
+                    <div className="w-24 h-24 rounded-xl border-2 border-dashed border-border flex items-center justify-center bg-muted/30">
                       <Building2
-                        size={32}
+                        size={28}
                         className="text-muted-foreground/40"
                       />
                     </div>
@@ -648,7 +653,7 @@ export default function EditOrganizerProfile() {
             </div>
 
             {/* Gallery Photos */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
                 <Camera size={14} /> Gallery Photos
               </h3>
@@ -704,7 +709,7 @@ export default function EditOrganizerProfile() {
             </div>
 
             {/* Verification Documents */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
                 <CheckCircle size={14} className="text-emerald-500" /> Business
                 Verification

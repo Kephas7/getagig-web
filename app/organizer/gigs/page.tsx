@@ -16,6 +16,7 @@ import {
   Briefcase,
   ArrowRight,
   ChevronDown,
+  Sparkles,
 } from "lucide-react";
 import Link from "next/link";
 import { getOrganizerProfile } from "@/lib/api/organizer";
@@ -230,22 +231,41 @@ export default function OrganizerGigsPage() {
     <div className="min-h-screen bg-background">
       <OrganizerHeader />
 
-      <main className="mx-auto max-w-7xl px-5 lg:px-8 pt-28 pb-16">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 mb-6">
-          <motion.div {...fadeUp(0)}>
-            <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-foreground">
-              My Gigs
-            </h1>
-            <p className="mt-2 text-muted-foreground">
-              Track all your postings and manage applications quickly.
-            </p>
-          </motion.div>
+      <main className="mx-auto max-w-7xl px-5 lg:px-8 pt-24 md:pt-8 pb-16">
+        <motion.section
+          {...fadeUp(0)}
+          className="role-hero-shell mb-6 p-6 md:p-8"
+        >
+          <div className="role-hero-content flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wide mb-3 border border-primary/20">
+                <Sparkles size={12} className="animate-pulse" />
+                Organizer Gigs
+              </div>
+              <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-foreground mt-1">
+                Manage Your <span className="gradient-text">Gig Posts</span>
+              </h1>
+              <p className="mt-2 max-w-lg text-muted-foreground font-medium">
+                Track postings, monitor statuses, and manage applicants from one
+                place.
+              </p>
+              <div className="mt-5 flex flex-wrap gap-2.5">
+                <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-[11px] font-semibold text-primary">
+                  {totalGigs} Total Posts
+                </span>
+                <span className="inline-flex items-center rounded-full border border-success/20 bg-success/10 px-3 py-1 text-[11px] font-semibold text-success">
+                  {openGigs} Open
+                </span>
+                <span className="inline-flex items-center rounded-full border border-border/70 bg-background/70 px-3 py-1 text-[11px] font-semibold text-foreground/75">
+                  {closedGigs} Closed / Filled
+                </span>
+              </div>
+            </div>
 
-          <motion.div {...fadeUp(0.05)}>
             {canPostGig ? (
               <Link
                 href="/organizer/gigs/new"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-colors shadow-sm"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-colors shadow-sm shrink-0"
               >
                 <Plus size={16} />
                 Post New Gig
@@ -253,13 +273,13 @@ export default function OrganizerGigsPage() {
             ) : (
               <Link
                 href="/organizer/profile"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-border/60 text-sm font-semibold hover:bg-secondary/30 transition-colors"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-warning/30 bg-warning/10 text-warning text-sm font-semibold hover:bg-warning/15 transition-colors shrink-0"
               >
                 Verify to Post Gigs
               </Link>
             )}
-          </motion.div>
-        </div>
+          </div>
+        </motion.section>
 
         {!canPostGig && (
           <motion.div

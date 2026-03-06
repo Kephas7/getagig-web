@@ -35,6 +35,19 @@ export default function MusicianGigsPage() {
   const [filterType, setFilterType] = useState("all");
   const [error, setError] = useState("");
 
+  const getOrganizerAvatar = (gig: Gig) => {
+    const organizer: any = gig.organizer;
+    const organizerId: any = gig.organizerId;
+
+    return (
+      organizer?.profilePicture ||
+      organizer?.userId?.profilePicture ||
+      organizerId?.profilePicture ||
+      organizerId?.userId?.profilePicture ||
+      ""
+    );
+  };
+
   useEffect(() => {
     const fetchGigs = async () => {
       try {
@@ -96,10 +109,10 @@ export default function MusicianGigsPage() {
     <div className="min-h-screen bg-background text-foreground">
       <MusicianHeader />
 
-      <main className="mx-auto max-w-6xl px-5 lg:px-8 pt-30 pb-16">
+      <main className="mx-auto max-w-6xl px-5 lg:px-8 pt-24 md:pt-8 pb-16">
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
-          <motion.div {...fadeUp(0)}>
+        <div className="role-hero-shell mb-8 p-6 md:p-8">
+          <motion.div {...fadeUp(0)} className="role-hero-content">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wide mb-3 border border-primary/20">
               <Sparkles size={14} />
               Live Opportunities
@@ -162,105 +175,100 @@ export default function MusicianGigsPage() {
         <AnimatePresence mode="popLayout">
           {filteredGigs.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {filteredGigs.map((gig, index) => (
-                <motion.div
-                  key={gig.id}
-                  layout
-                  {...fadeUp(0.2 + index * 0.05)}
-                  className="group flex flex-col bg-card border border-border/60 rounded-3xl p-6 transition-colors"
-                >
-                  <div className="mb-4 flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      {gig.organizer?.profilePicture ? (
-                        <img
-                          src={resolveMediaUrl(gig.organizer.profilePicture)}
-                          alt={
-                            gig.organizer.displayName ||
-                            gig.organizer.organizationName ||
-                            gig.organizer.username ||
-                            "Organizer"
-                          }
-                          className="h-8 w-8 rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold shrink-0">
-                          {(
-                            gig.organizer?.displayName ||
-                            gig.organizer?.organizationName ||
-                            gig.organizer?.username ||
-                            "O"
-                          )
-                            .charAt(0)
-                            .toUpperCase()}
+              {filteredGigs.map((gig, index) => {
+                const organizerAvatar = getOrganizerAvatar(gig);
+                const organizerName =
+                  gig.organizer?.displayName ||
+                  gig.organizer?.organizationName ||
+                  gig.organizer?.username ||
+                  "Organizer";
+
+                return (
+                  <motion.div
+                    key={gig.id}
+                    layout
+                    {...fadeUp(0.2 + index * 0.05)}
+                    className="group flex flex-col bg-card border border-border/60 rounded-3xl p-6 transition-colors"
+                  >
+                    <div className="mb-4 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        {organizerAvatar ? (
+                          <img
+                            src={resolveMediaUrl(organizerAvatar)}
+                            alt={organizerName}
+                            className="h-8 w-8 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold shrink-0">
+                            {organizerName.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+
+                        <div className="min-w-0">
+                          <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                            Organizer
+                          </p>
+                          <p className="text-sm font-medium text-foreground truncate">
+                            {organizerName}
+                          </p>
                         </div>
-                      )}
-                      <div className="min-w-0">
-                        <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                          Organizer
-                        </p>
-                        <p className="text-sm font-medium text-foreground truncate">
-                          {gig.organizer?.displayName ||
-                            gig.organizer?.organizationName ||
-                            gig.organizer?.username ||
-                            "Organizer"}
-                        </p>
+                      </div>
+
+                      <div className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 text-[10px] font-semibold uppercase tracking-wide">
+                        {gig.status}
                       </div>
                     </div>
-                    <div className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 text-[10px] font-semibold uppercase tracking-wide">
-                      {gig.status}
-                    </div>
-                  </div>
 
-                  <h3 className="text-lg font-semibold mb-3 line-clamp-2 leading-snug group-hover:text-primary transition-colors">
-                    {gig.title}
-                  </h3>
+                    <h3 className="text-lg font-semibold mb-3 line-clamp-2 leading-snug group-hover:text-primary transition-colors">
+                      {gig.title}
+                    </h3>
 
-                  <div className="space-y-3 mb-8">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
-                      <MapPin size={16} className="text-primary/70" />
-                      {gig.location}
+                    <div className="space-y-3 mb-8">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
+                        <MapPin size={16} className="text-primary/70" />
+                        {gig.location}
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
+                        <DollarSign size={16} className="text-primary/70" />
+                        <span className="text-foreground font-semibold">
+                          Rs. {gig.payRate}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
+                        <Clock size={16} className="text-primary/70" />
+                        Due: {new Date(gig.deadline).toLocaleDateString()}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
-                      <DollarSign size={16} className="text-primary/70" />
-                      <span className="text-foreground font-semibold">
-                        Rs. {gig.payRate}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
-                      <Clock size={16} className="text-primary/70" />
-                      Due: {new Date(gig.deadline).toLocaleDateString()}
-                    </div>
-                  </div>
 
-                  {/* Tags */}
-                  <div className="flex flex-wrap gap-2 mt-auto mb-6">
-                    {gig.genres.slice(0, 2).map((genre, gIdx) => (
-                      <span
-                        key={`${genre}-${gIdx}`}
-                        className="px-3 py-1 rounded-lg bg-secondary/50 text-[11px] font-medium text-muted-foreground"
-                      >
-                        {genre}
-                      </span>
-                    ))}
-                    {gig.genres.length > 2 && (
-                      <span className="px-3 py-1 rounded-lg bg-secondary/30 text-[11px] font-medium text-muted-foreground/60">
-                        +{gig.genres.length - 2}
-                      </span>
-                    )}
-                  </div>
+                    <div className="flex flex-wrap gap-2 mt-auto mb-6">
+                      {gig.genres.slice(0, 2).map((genre, gIdx) => (
+                        <span
+                          key={`${genre}-${gIdx}`}
+                          className="px-3 py-1 rounded-lg bg-secondary/50 text-[11px] font-medium text-muted-foreground"
+                        >
+                          {genre}
+                        </span>
+                      ))}
+                      {gig.genres.length > 2 && (
+                        <span className="px-3 py-1 rounded-lg bg-secondary/30 text-[11px] font-medium text-muted-foreground/60">
+                          +{gig.genres.length - 2}
+                        </span>
+                      )}
+                    </div>
 
-                  <Link
-                    href={`/musician/gigs/${gig.id}`}
-                    className="flex items-center justify-between w-full px-5 py-2.5 rounded-xl bg-foreground text-background text-sm font-semibold uppercase tracking-wide transition-colors hover:opacity-90 group/btn"
-                  >
-                    View Details
-                    <ArrowRight
-                      size={18}
-                      className="translate-x-0 group-hover/btn:translate-x-1 transition-transform"
-                    />
-                  </Link>
-                </motion.div>
-              ))}
+                    <Link
+                      href={`/musician/gigs/${gig.id}`}
+                      className="flex items-center justify-between w-full px-5 py-2.5 rounded-xl bg-foreground text-background text-sm font-semibold uppercase tracking-wide transition-colors hover:opacity-90 group/btn"
+                    >
+                      View Details
+                      <ArrowRight
+                        size={18}
+                        className="translate-x-0 group-hover/btn:translate-x-1 transition-transform"
+                      />
+                    </Link>
+                  </motion.div>
+                );
+              })}
             </div>
           ) : (
             <motion.div

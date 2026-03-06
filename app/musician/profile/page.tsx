@@ -222,13 +222,10 @@ export default function MusicianProfilePage() {
     <div className="min-h-screen bg-background relative overflow-x-clip">
       <MusicianHeader />
 
-      <main className="relative z-10 mx-auto max-w-6xl px-5 lg:px-8 pt-28 pb-16">
+      <main className="relative z-10 mx-auto max-w-6xl px-5 lg:px-8 pt-24 md:pt-8 pb-16">
         {/* ── Hero Card ── */}
-        <motion.div
-          {...fadeUp(0)}
-          className="relative rounded-3xl overflow-hidden mb-8 border border-border/70 shadow-sm bg-card"
-        >
-          <div className="px-6 md:px-8 py-6 md:py-7">
+        <motion.div {...fadeUp(0)} className="role-hero-shell mb-8">
+          <div className="role-hero-content px-6 md:px-8 py-6 md:py-7">
             <div className="grid grid-cols-1 xl:grid-cols-[auto_1fr] gap-6 xl:gap-8 items-start">
               <div className="space-y-3">
                 <div

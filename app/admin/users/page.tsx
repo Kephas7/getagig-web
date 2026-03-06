@@ -3,6 +3,7 @@ import { getAuthToken } from "@/lib/cookies";
 import { UsersTable } from "./_components/UsersTable";
 import Link from "next/link";
 import { Plus } from "lucide-react";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -15,6 +16,10 @@ export default async function UsersPage({
   const params = await searchParams;
   const token = await getAuthToken();
 
+  if (!token) {
+    redirect("/login");
+  }
+
   const initialFilter =
     params.filter === "musician" ||
     params.filter === "organizer" ||
@@ -26,7 +31,7 @@ export default async function UsersPage({
   let error = null;
 
   try {
-    const userData = await getUsers(token || undefined);
+    const userData = await getUsers(token);
 
     if (userData?.data?.users) {
       users = userData.data.users;
@@ -38,6 +43,10 @@ export default async function UsersPage({
       users = [];
     }
   } catch (err: any) {
+    if (/unauthorized|no bearer token/i.test(err?.message || "")) {
+      redirect("/login");
+    }
+
     console.error("Failed to fetch users:", err);
     error = err.message || "Failed to load users";
   }
@@ -68,7 +77,7 @@ export default async function UsersPage({
       ) : (
         <UsersTable
           initialUsers={users}
-          token={token || undefined}
+          token={token}
           initialFilter={initialFilter}
         />
       )}
