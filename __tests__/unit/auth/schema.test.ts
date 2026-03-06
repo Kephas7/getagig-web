@@ -3,7 +3,7 @@ import {
   signupSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
-} from "./schema";
+} from "@/app/(auth)/schema";
 
 describe("auth schemas", () => {
   it("accepts valid signup payload", () => {

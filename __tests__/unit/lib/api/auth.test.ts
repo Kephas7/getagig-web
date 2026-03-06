@@ -1,8 +1,8 @@
-import axios from "./axios";
-import { API } from "./endpoints";
-import { forgotPassword, login, register, resetPassword } from "./auth";
+import axios from "@/lib/api/axios";
+import { API } from "@/lib/api/endpoints";
+import { forgotPassword, login, register, resetPassword } from "@/lib/api/auth";
 
-jest.mock("./axios", () => ({
+jest.mock("@/lib/api/axios", () => ({
   __esModule: true,
   default: {
     post: jest.fn(),

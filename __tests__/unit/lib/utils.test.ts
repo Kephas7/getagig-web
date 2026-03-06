@@ -1,4 +1,4 @@
-import { resolveMediaUrl } from "./utils";
+import { resolveMediaUrl } from "@/lib/utils";
 
 const getExpectedBaseUrl = () => {
   const rawBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
