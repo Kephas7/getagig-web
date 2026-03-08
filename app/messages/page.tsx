@@ -67,9 +67,39 @@ export default function MessagesPage() {
       });
     };
 
+    const handleConversationCleared = (payload: any) => {
+      const conversationId = String(payload?.conversationId || "");
+      if (!conversationId) return;
+
+      setConversations((prev) =>
+        prev.map((conversation) =>
+          conversation._id === conversationId
+            ? {
+                ...conversation,
+                lastMessage: "",
+                updatedAt: new Date().toISOString(),
+              }
+            : conversation,
+        ),
+      );
+    };
+
+    const handleConversationDeleted = (payload: any) => {
+      const conversationId = String(payload?.conversationId || "");
+      if (!conversationId) return;
+
+      setConversations((prev) =>
+        prev.filter((conversation) => conversation._id !== conversationId),
+      );
+    };
+
     socket.on("newMessage", handleNewMessage);
+    socket.on("conversationCleared", handleConversationCleared);
+    socket.on("conversationDeleted", handleConversationDeleted);
     return () => {
       socket.off("newMessage", handleNewMessage);
+      socket.off("conversationCleared", handleConversationCleared);
+      socket.off("conversationDeleted", handleConversationDeleted);
     };
   }, [socket]);
 

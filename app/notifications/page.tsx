@@ -9,6 +9,10 @@ import {
   markAllNotificationsRead,
   Notification,
 } from "@/lib/api/notification";
+import {
+  filterNotificationsForUser,
+  isNotificationVisibleForUser,
+} from "@/lib/notification-visibility";
 import { getAuthToken } from "@/lib/cookies";
 import MusicianHeader from "@/app/musician/_components/MusicianHeader";
 import OrganizerHeader from "@/app/organizer/_components/OrganizerHeader";
@@ -87,6 +91,7 @@ export default function NotificationsPage() {
   const { user } = useAuth();
   const { socket } = useSocket();
   const router = useRouter();
+  const currentUserId = user?._id || (user as any)?.id || null;
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [markingAll, setMarkingAll] = useState(false);
@@ -97,7 +102,16 @@ export default function NotificationsPage() {
       if (!token) return;
       const response = await getNotifications(token);
       if (response.success) {
-        setNotifications(response.data);
+        const allNotifications = Array.isArray(response.data)
+          ? response.data
+          : [];
+        setNotifications(
+          filterNotificationsForUser(
+            allNotifications,
+            user?.role,
+            currentUserId,
+          ),
+        );
       }
     } catch (err) {
       console.error("Failed to load notifications", err);
@@ -108,19 +122,28 @@ export default function NotificationsPage() {
 
   useEffect(() => {
     fetchNotifications();
-  }, []);
+  }, [user?.role, currentUserId]);
 
   // Real-time: add new notifications at the top
   useEffect(() => {
     if (!socket) return;
     const handleNew = (notif: any) => {
+      if (
+        !isNotificationVisibleForUser(
+          notif as Notification,
+          user?.role,
+          currentUserId,
+        )
+      ) {
+        return;
+      }
       setNotifications((prev) => [notif, ...prev]);
     };
     socket.on("receiveNotification", handleNew);
     return () => {
       socket.off("receiveNotification", handleNew);
     };
-  }, [socket]);
+  }, [socket, user?.role, currentUserId]);
 
   const handleMark = async (id: string) => {
     try {

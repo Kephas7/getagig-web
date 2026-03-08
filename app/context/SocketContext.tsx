@@ -13,6 +13,10 @@ import { useAuth } from "./AuthContext";
 import { getAuthToken } from "@/lib/cookies";
 import { toast } from "@/lib/toast";
 import { usePathname } from "next/navigation";
+import {
+  filterNotificationsForUser,
+  isNotificationVisibleForUser,
+} from "@/lib/notification-visibility";
 
 interface SocketContextType {
   socket: Socket | null;
@@ -77,14 +81,18 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
         const data = await res.json();
 
         if (data?.success && Array.isArray(data.data)) {
-          const notifications: any[] = data.data;
+          const userNotifications = filterNotificationsForUser(
+            data.data,
+            user?.role,
+            userId,
+          );
 
-          const msgUnread = notifications.filter(
-            (n) => n.type === "new_message" && !n.isRead
+          const msgUnread = userNotifications.filter(
+            (n) => n.type === "new_message" && !n.isRead,
           ).length;
 
-          const generalUnread = notifications.filter(
-            (n) => n.type !== "new_message" && !n.isRead
+          const generalUnread = userNotifications.filter(
+            (n) => n.type !== "new_message" && !n.isRead,
           ).length;
 
           if (!pathname?.startsWith("/messages")) {
@@ -141,7 +149,7 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
       // New real-time message → bump message badge if not viewing that chat
       socketInstance.on("newMessage", (message: any) => {
         const isViewingConversation = pathname?.startsWith(
-          `/messages/${message.conversationId}`
+          `/messages/${message.conversationId}`,
         );
         if (!isViewingConversation) {
           setUnreadCount((prev) => prev + 1);
@@ -150,6 +158,10 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
 
       // New general notification → bump notif badge + show toast
       socketInstance.on("receiveNotification", (notif: any) => {
+        if (!isNotificationVisibleForUser(notif, user?.role, userId)) {
+          return;
+        }
+
         if (notif?.type === "new_message") {
           if (!pathname?.startsWith("/messages")) {
             setUnreadCount((prev) => prev + 1);

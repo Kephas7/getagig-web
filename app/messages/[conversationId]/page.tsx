@@ -4,12 +4,26 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { useSocket } from "@/app/context/SocketContext";
-import { getMessages, sendMessage, Message } from "@/lib/api/message";
+import {
+  clearConversation,
+  deleteConversation,
+  getMessages,
+  sendMessage,
+  Message,
+} from "@/lib/api/message";
 import { getAuthToken } from "@/lib/cookies";
 import MusicianHeader from "@/app/musician/_components/MusicianHeader";
 import OrganizerHeader from "@/app/organizer/_components/OrganizerHeader";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, ArrowLeft, Loader2, User, CheckCheck } from "lucide-react";
+import {
+  Send,
+  ArrowLeft,
+  Loader2,
+  User,
+  CheckCheck,
+  Eraser,
+  Trash2,
+} from "lucide-react";
 import { resolveMediaUrl } from "@/lib/utils";
 import { toast } from "@/lib/toast";
 
@@ -26,11 +40,16 @@ export default function ChatPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { socket } = useSocket();
+  const activeConversationId = Array.isArray(conversationId)
+    ? conversationId[0]
+    : conversationId;
   const [messages, setMessages] = useState<Message[]>([]);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [loading, setLoading] = useState(true);
   const [content, setContent] = useState("");
   const [sending, setSending] = useState(false);
+  const [clearing, setClearing] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -53,8 +72,8 @@ export default function ChatPage() {
   const fetchData = async () => {
     try {
       const token = await getAuthToken();
-      if (!token) return;
-      const response = await getMessages(token, conversationId as string);
+      if (!token || !activeConversationId) return;
+      const response = await getMessages(token, activeConversationId);
       if (response.success) {
         setMessages(response.data?.messages ?? []);
         setParticipants(response.data?.participants ?? []);
@@ -68,27 +87,55 @@ export default function ChatPage() {
   };
 
   useEffect(() => {
-    if (conversationId) fetchData();
-  }, [conversationId]);
+    if (activeConversationId) fetchData();
+  }, [activeConversationId]);
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
   useEffect(() => {
-    if (!socket || !conversationId) return;
-    socket.emit("joinConversation", conversationId);
+    if (!socket || !activeConversationId) return;
+    socket.emit("joinConversation", activeConversationId);
+
     const handleNewMessage = (message: any) => {
-      if (String(message.conversationId) === String(conversationId)) {
+      if (String(message.conversationId) === String(activeConversationId)) {
         setMessages((prev) => [...prev, message]);
       }
     };
-    socket.on("newMessage", handleNewMessage);
-    return () => {
-      socket.emit("leaveConversation", conversationId);
-      socket.off("newMessage", handleNewMessage);
+
+    const handleConversationCleared = (payload: any) => {
+      if (String(payload?.conversationId) !== String(activeConversationId)) {
+        return;
+      }
+
+      setMessages([]);
+      if (String(payload?.clearedBy) !== String(user?._id)) {
+        toast.info("Conversation was cleared.");
+      }
     };
-  }, [socket, conversationId]);
+
+    const handleConversationDeleted = (payload: any) => {
+      if (String(payload?.conversationId) !== String(activeConversationId)) {
+        return;
+      }
+
+      if (String(payload?.deletedBy) !== String(user?._id)) {
+        toast.info("Conversation was deleted.");
+      }
+      router.push("/messages");
+    };
+
+    socket.on("newMessage", handleNewMessage);
+    socket.on("conversationCleared", handleConversationCleared);
+    socket.on("conversationDeleted", handleConversationDeleted);
+    return () => {
+      socket.emit("leaveConversation", activeConversationId);
+      socket.off("newMessage", handleNewMessage);
+      socket.off("conversationCleared", handleConversationCleared);
+      socket.off("conversationDeleted", handleConversationDeleted);
+    };
+  }, [socket, activeConversationId, user?._id, router]);
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,9 +143,9 @@ export default function ChatPage() {
     setSending(true);
     try {
       const token = await getAuthToken();
-      if (!token) return;
+      if (!token || !activeConversationId) return;
       const response = await sendMessage(token, {
-        conversationId: conversationId as string,
+        conversationId: activeConversationId,
         content: content.trim(),
       });
       if (response.success) {
@@ -108,6 +155,64 @@ export default function ChatPage() {
       toast.error("Failed to send message.");
     } finally {
       setSending(false);
+    }
+  };
+
+  const handleClearConversation = async () => {
+    if (!activeConversationId || clearing || deleting) return;
+
+    if (
+      typeof window !== "undefined" &&
+      !window.confirm("Clear all messages in this conversation?")
+    ) {
+      return;
+    }
+
+    setClearing(true);
+    try {
+      const token = await getAuthToken();
+      if (!token) return;
+
+      const response = await clearConversation(token, activeConversationId);
+      if (response?.success) {
+        setMessages([]);
+        toast.success(response?.message || "Conversation cleared.");
+      } else {
+        toast.error(response?.message || "Failed to clear conversation.");
+      }
+    } catch {
+      toast.error("Failed to clear conversation.");
+    } finally {
+      setClearing(false);
+    }
+  };
+
+  const handleDeleteConversation = async () => {
+    if (!activeConversationId || clearing || deleting) return;
+
+    if (
+      typeof window !== "undefined" &&
+      !window.confirm("Delete this conversation permanently?")
+    ) {
+      return;
+    }
+
+    setDeleting(true);
+    try {
+      const token = await getAuthToken();
+      if (!token) return;
+
+      const response = await deleteConversation(token, activeConversationId);
+      if (response?.success) {
+        toast.success(response?.message || "Conversation deleted.");
+        router.push("/messages");
+      } else {
+        toast.error(response?.message || "Failed to delete conversation.");
+      }
+    } catch {
+      toast.error("Failed to delete conversation.");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -166,6 +271,36 @@ export default function ChatPage() {
                   </p>
                 </div>
               </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleClearConversation}
+                disabled={clearing || deleting}
+                className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-2 text-xs font-semibold text-foreground hover:bg-muted transition-colors disabled:opacity-60"
+              >
+                {clearing ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : (
+                  <Eraser size={14} />
+                )}
+                Clear
+              </button>
+
+              <button
+                type="button"
+                onClick={handleDeleteConversation}
+                disabled={clearing || deleting}
+                className="inline-flex items-center gap-2 rounded-xl border border-red-300/50 bg-red-500/10 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-500/20 transition-colors disabled:opacity-60"
+              >
+                {deleting ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : (
+                  <Trash2 size={14} />
+                )}
+                Delete
+              </button>
             </div>
           </div>
         </div>
